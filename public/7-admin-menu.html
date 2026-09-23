@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen admin — manage menu</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #FFFFFF;
+  --muted: #C7D6E5;
+  --border: #24425F;
+  --danger: #B5433F;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+.icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.sidebar-dark .nav-link { color: rgba(255,255,255,0.9); }
+.sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+.sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.table-dark-custom { color: var(--text); background: transparent; }
+.table-dark-custom th { color: #FFFFFF; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-color: var(--border) !important; background: transparent; }
+.table-dark-custom td { color: #FFFFFF; border-color: var(--border) !important; vertical-align: middle; background: transparent; }
+.table-dark-custom tr { background: transparent; }
+
+.item-thumb { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--mustard), var(--maroon)); display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.cat-pill { font-size: 0.75rem; background: var(--card); color: #FFFFFF; }
+
+.form-check-input:checked { background-color: #3D7A4E; border-color: #3D7A4E; }
+
+.btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+.btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+.btn-outline-teal { border: 1px solid var(--danger); color: var(--danger); background: transparent; }
+.btn-outline-teal:hover { background: var(--danger); color: #fff; }
+
+.modal-content-dark { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.form-control-dark, .form-select-dark { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+.form-label-dark { color: #FFFFFF; font-size: 0.82rem; font-weight: 600; }
+</style>
+</head>
+<body>
+<script>
+if (sessionStorage.getItem("admin_logged_in") !== "true") {
+  window.location.href = "admin-login.html";
+}
+</script>
+
+<div class="d-flex">
+  <div class="sidebar-dark p-3 flex-shrink-0">
+    <div class="d-flex align-items-center gap-2 font-display fs-5 text-white mb-4 px-1">
+      <span class="icon-badge">🍴</span> Canteen Admin
+    </div>
+    <nav class="nav flex-column gap-1">
+      <a href="5-admin-orders.html" class="nav-link rounded px-3 py-2">Order queue</a>
+      <a href="6-admin-sales.html" class="nav-link rounded px-3 py-2">Sales report</a>
+      <a href="7-admin-menu.html" class="nav-link active rounded px-3 py-2">Manage menu</a>
+      <a href="#" onclick="sessionStorage.clear(); window.location.href='admin-login.html';" class="nav-link rounded px-3 py-2 mt-3" style="color:rgba(255,255,255,0.5);">Log out</a>
+    </nav>
+  </div>
+
+  <div class="flex-grow-1 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="font-display mb-0">Manage menu</h2>
+      <button class="btn btn-teal" data-bs-toggle="modal" data-bs-target="#addModal">+ Add item</button>
+    </div>
+
+    <div class="card-dark p-3">
+      <table class="table table-dark-custom mb-0">
+        <thead>
+          <tr><th>Item</th><th>Category</th><th>Price</th><th>Available</th><th></th></tr>
+        </thead>
+        <tbody id="menuTableBody">
+          <tr><td colspan="5" class="text-center py-4" style="color:var(--muted);">Loading menu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-dark">
+      <div class="modal-header" style="border-color:var(--border);">
+        <h5 class="modal-title font-display">Add menu item</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="itemName" class="form-label form-label-dark">Item name</label>
+          <input id="itemName" type="text" class="form-control form-control-dark" placeholder="e.g. Pork Sisig Meal">
+        </div>
+        <div class="mb-3">
+          <label for="itemCat" class="form-label form-label-dark">Category</label>
+          <select id="itemCat" class="form-select form-select-dark">
+            <option>Meals</option>
+            <option>Snacks</option>
+            <option>Drinks</option>
+            <option>Desserts</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="itemPrice" class="form-label form-label-dark">Price (₱)</label>
+          <input id="itemPrice" type="number" class="form-control form-control-dark" placeholder="e.g. 65">
+        </div>
+        <div class="mb-2">
+          <label for="itemDesc" class="form-label form-label-dark">Description (optional)</label>
+          <input id="itemDesc" type="text" class="form-control form-control-dark" placeholder="Short description">
+        </div>
+        <div class="mb-2">
+          <label for="itemImage" class="form-label form-label-dark">Photo (optional)</label>
+          <input id="itemImage" type="file" accept="image/*" class="form-control form-control-dark">
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:var(--border);">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-teal" id="saveItemBtn">Save item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-dark">
+      <div class="modal-header" style="border-color:var(--border);">
+        <h5 class="modal-title font-display">Edit menu item</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editItemId">
+        <div class="mb-3">
+          <label for="editItemName" class="form-label form-label-dark">Item name</label>
+          <input id="editItemName" type="text" class="form-control form-control-dark">
+        </div>
+        <div class="mb-3">
+          <label for="editItemCat" class="form-label form-label-dark">Category</label>
+          <select id="editItemCat" class="form-select form-select-dark">
+            <option>Meals</option>
+            <option>Snacks</option>
+            <option>Drinks</option>
+            <option>Desserts</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="editItemPrice" class="form-label form-label-dark">Price (₱)</label>
+          <input id="editItemPrice" type="number" class="form-control form-control-dark">
+        </div>
+        <div class="mb-2">
+          <label for="editItemDesc" class="form-label form-label-dark">Description (optional)</label>
+          <input id="editItemDesc" type="text" class="form-control form-control-dark">
+        </div>
+        <div class="mb-2">
+          <label for="editItemImage" class="form-label form-label-dark">Replace photo (optional)</label>
+          <input id="editItemImage" type="file" accept="image/*" class="form-control form-control-dark">
+          <div class="form-text" style="color:var(--muted);">Iwan lang blangko kung ayaw mo palitan ang kasalukuyang larawan.</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:var(--border);">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-teal" id="updateItemBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const categoryEmoji = { Meals: '🍛', Snacks: '🍟', Drinks: '🧃', Desserts: '🍰' };
+let addModalInstance;
+let editModalInstance;
+let currentMenuItems = [];
+
+async function loadMenu() {
+  const tbody = document.getElementById('menuTableBody');
+  try {
+    const res = await fetch('/api/menu/all');
+    if (!res.ok) throw new Error('Server error');
+    const items = await res.json();
+    currentMenuItems = items;
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color:var(--muted);">No menu items yet. Add one using "+ Add item".</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = items.map(item => `
+      <tr data-id="${item.item_id}">
+        <td>${item.image_url ? `<img src="${item.image_url}" class="item-thumb me-2" style="object-fit:cover;">` : `<span class="item-thumb me-2">${categoryEmoji[item.category] || '🍽️'}</span>`}${item.item_name}</td>
+        <td><span class="badge cat-pill">${item.category}</span></td>
+        <td>₱${item.price}</td>
+        <td>
+          <div class="form-check form-switch">
+            <input class="form-check-input avail-toggle" type="checkbox" ${item.is_available ? 'checked' : ''} data-id="${item.item_id}">
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-outline-secondary edit-btn me-1" data-id="${item.item_id}">Edit</button>
+          <button class="btn btn-sm btn-outline-teal delete-btn" data-id="${item.item_id}">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.avail-toggle').forEach(toggle => {
+      toggle.addEventListener('change', async function() {
+        await fetch(`/api/menu/${this.dataset.id}/availability`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_available: this.checked })
+        });
+      });
+    });
+
+    tbody.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const item = currentMenuItems.find(i => i.item_id == this.dataset.id);
+        if (!item) return;
+        document.getElementById('editItemId').value = item.item_id;
+        document.getElementById('editItemName').value = item.item_name;
+        document.getElementById('editItemCat').value = item.category;
+        document.getElementById('editItemPrice').value = item.price;
+        document.getElementById('editItemDesc').value = item.description || '';
+        document.getElementById('editItemImage').value = '';
+        editModalInstance.show();
+      });
+    });
+
+    tbody.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        if (!confirm('Remove this item from the menu?')) return;
+        await fetch(`/api/menu/${this.dataset.id}`, { method: 'DELETE' });
+        loadMenu();
+      });
+    });
+
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color:var(--muted);">Could not load the menu. Make sure the server is running.</td></tr>';
+    console.error(err);
+  }
+}
+
+async function addItem() {
+  const item_name = document.getElementById('itemName').value;
+  const category = document.getElementById('itemCat').value;
+  const price = document.getElementById('itemPrice').value;
+  const description = document.getElementById('itemDesc').value;
+  const imageFile = document.getElementById('itemImage').files[0];
+
+  if (!item_name || !price) {
+    alert('Item name and price are required.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('item_name', item_name);
+  formData.append('category', category);
+  formData.append('price', price);
+  formData.append('description', description);
+  if (imageFile) formData.append('image', imageFile);
+
+  try {
+    const res = await fetch('/api/menu', {
+      method: 'POST',
+      body: formData // walang Content-Type header — awtomatikong itatakda ng browser (multipart/form-data)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Could not save the item.');
+    }
+    addModalInstance.hide();
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('itemDesc').value = '';
+    document.getElementById('itemImage').value = '';
+    loadMenu();
+  } catch (err) {
+    alert(err.message || 'Could not save the item.');
+  }
+}
+
+async function updateItem() {
+  const id = document.getElementById('editItemId').value;
+  const item_name = document.getElementById('editItemName').value;
+  const category = document.getElementById('editItemCat').value;
+  const price = document.getElementById('editItemPrice').value;
+  const description = document.getElementById('editItemDesc').value;
+  const imageFile = document.getElementById('editItemImage').files[0];
+
+  if (!item_name || !price) {
+    alert('Item name and price are required.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('item_name', item_name);
+  formData.append('category', category);
+  formData.append('price', price);
+  formData.append('description', description);
+  if (imageFile) formData.append('image', imageFile);
+
+  try {
+    const res = await fetch(`/api/menu/${id}`, {
+      method: 'PUT',
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Could not update the item.');
+    }
+    editModalInstance.hide();
+    loadMenu();
+  } catch (err) {
+    alert(err.message || 'Could not update the item.');
+  }
+}
+
+document.getElementById('saveItemBtn').addEventListener('click', addItem);
+document.getElementById('updateItemBtn').addEventListener('click', updateItem);
+addModalInstance = new bootstrap.Modal(document.getElementById('addModal'));
+editModalInstance = new bootstrap.Modal(document.getElementById('editModal'));
+
+loadMenu();
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

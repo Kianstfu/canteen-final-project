@@ -1,0 +1,3 @@
+
+
+ALTER TABLE menu_items ADD COLUMN image_url VARCHAR(255) AFTER description;

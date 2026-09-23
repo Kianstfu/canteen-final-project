@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen admin — order queue</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success: #3D7A4E;
+  --success-bg: #E7F3E9;
+  --pending: #B07A1F;
+  --pending-bg: #FBF0DA;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+.icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.sidebar-dark .nav-link { color: rgba(255,255,255,0.75); }
+.sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+.sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.order-card.delivered { opacity: 0.4; }
+.order-card.cancelled { opacity: 0.5; }
+.order-id-text { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--mustard); }
+
+.badge-pending { background: var(--pending-bg); color: var(--pending); }
+.badge-preparing { background: #E1EAF5; color: #2E5A9C; }
+.badge-ready { background: var(--success-bg); color: var(--success); }
+.badge-delivered { background: var(--border); color: var(--muted); }
+.badge-cancelled { background: #FBEAEA; color: #B5433F; }
+
+.status-btn.pending { background: var(--mustard); color: var(--maroon-dark); border: none; }
+.status-btn.preparing { background: #2E5A9C; color: #fff; border: none; }
+.status-btn.ready { background: var(--success); color: #fff; border: none; }
+.status-btn:disabled { background: var(--border); color: var(--muted); border: none; }
+</style>
+</head>
+<body>
+<script>
+if (sessionStorage.getItem("admin_logged_in") !== "true") {
+  window.location.href = "admin-login.html";
+}
+</script>
+
+<div class="d-flex">
+  <div class="sidebar-dark p-3 flex-shrink-0">
+    <div class="d-flex align-items-center gap-2 font-display fs-5 text-white mb-4 px-1">
+      <span class="icon-badge">🍴</span> Canteen Admin
+    </div>
+    <nav class="nav flex-column gap-1">
+      <a href="5-admin-orders.html" class="nav-link active rounded px-3 py-2">Order queue</a>
+      <a href="6-admin-sales.html" class="nav-link rounded px-3 py-2">Sales report</a>
+      <a href="7-admin-menu.html" class="nav-link rounded px-3 py-2">Manage menu</a>
+      <a href="#" onclick="sessionStorage.clear(); window.location.href='admin-login.html';" class="nav-link rounded px-3 py-2 mt-3" style="color:rgba(255,255,255,0.5);">Log out</a>
+    </nav>
+  </div>
+
+  <div class="flex-grow-1 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="font-display mb-0">Order queue</h2>
+      <span class="small" style="color:var(--muted);" id="orderCount">Loading...</span>
+    </div>
+
+    <div class="row g-3" id="queueGrid">
+      <div class="col-12 text-center py-5" style="color:var(--muted);">Loading orders...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const statusFlow = {
+  pending: { next: 'preparing', label: 'Start preparing', badgeClass: 'badge-pending', badgeText: 'Pending', btnClass: 'pending' },
+  preparing: { next: 'ready', label: 'Mark as ready', badgeClass: 'badge-preparing', badgeText: 'Preparing', btnClass: 'preparing' },
+  ready: { next: 'delivered', label: 'Mark as delivered', badgeClass: 'badge-ready', badgeText: 'Ready', btnClass: 'ready' },
+  delivered: { next: null, label: 'Delivered ✓', badgeClass: 'badge-delivered', badgeText: 'Delivered', btnClass: '' },
+  cancelled: { next: null, label: 'Cancelled by customer', badgeClass: 'badge-cancelled', badgeText: 'Cancelled', btnClass: '' }
+};
+
+let knownOrderIds = null; // null = unang beses pa lang, wag mag-notify
+
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // dalawang maikling "ding" tone, parang notification bell
+    [880, 1108].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const startTime = ctx.currentTime + i * 0.15;
+      gain.gain.setValueAtTime(0.2, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+      osc.start(startTime);
+      osc.stop(startTime + 0.3);
+    });
+  } catch (err) {
+    console.error('Could not play notification sound:', err);
+  }
+}
+
+async function loadOrders() {
+  const grid = document.getElementById('queueGrid');
+  try {
+    const res = await fetch('/api/orders');
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    const ordersMap = {};
+    rows.forEach(row => {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          customer_name: row.customer_name,
+          building: row.building,
+          room_number: row.room_number,
+          total_amount: row.total_amount,
+          status: row.status,
+          followed_up: row.followed_up,
+          rating: row.rating,
+          notes: row.notes,
+          items: []
+        };
+      }
+      ordersMap[row.order_id].items.push({ name: row.item_name, qty: row.quantity });
+    });
+
+    const orders = Object.values(ordersMap);
+    document.getElementById('orderCount').textContent = orders.length + ' total orders';
+
+    // i-detect kung may bagong order na dumating mula nung huling check
+    const currentIds = new Set(orders.map(o => o.order_id));
+    if (knownOrderIds !== null) {
+      const hasNewOrder = [...currentIds].some(id => !knownOrderIds.has(id));
+      if (hasNewOrder) playNotificationSound();
+    }
+    knownOrderIds = currentIds;
+
+    if (orders.length === 0) {
+      grid.innerHTML = '<div class="col-12 text-center py-5" style="color:var(--muted);">No orders yet.</div>';
+      return;
+    }
+
+    grid.innerHTML = orders.map(o => {
+      const flow = statusFlow[o.status] || statusFlow.pending;
+      const itemsHtml = o.items.map(i => `<li>${i.qty}x ${i.name}</li>`).join('');
+      const followupBanner = o.followed_up
+        ? `<div class="small fw-bold rounded px-2 py-1 mb-2" style="background:#5A2A1E; color:#FFB199;">⚠️ Customer sent a follow-up!</div>`
+        : '';
+      const ratingHtml = o.rating
+        ? `<div class="small mb-2" style="color:#F5C518;">${'★'.repeat(o.rating)}${'☆'.repeat(5 - o.rating)} <span style="color:var(--muted); font-size:0.75rem;">(${o.rating}/5)</span></div>`
+        : '';
+      const cancelledClass = o.status === 'cancelled' ? 'cancelled' : '';
+      const deliveredClass = o.status === 'delivered' ? 'delivered' : '';
+      const followedStyle = o.followed_up ? 'border-color:#E85D3D; box-shadow:0 0 0 2px rgba(232,93,61,0.3);' : '';
+
+      return `
+        <div class="col-md-6 col-lg-4">
+          <div class="card-dark order-card p-3 ${deliveredClass} ${cancelledClass}" data-order-id="${o.order_id}" style="${followedStyle}">
+            ${followupBanner}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="order-id-text">#A-${String(o.order_id).padStart(4, '0')}</span>
+              <span class="badge ${flow.badgeClass}">${flow.badgeText}</span>
+            </div>
+            <div class="small mb-2" style="color:var(--muted);">${o.building} Building, ${o.room_number} · ${o.customer_name}</div>
+            <ul class="small mb-2 ps-3">${itemsHtml}</ul>
+            ${o.notes ? `<div class="small mb-2 p-2 rounded" style="background:rgba(45,212,191,0.1); border:1px solid var(--mustard); color:var(--mustard);">📝 <b>Note:</b> ${o.notes}</div>` : ''}
+            <div class="fw-bold mb-2">Total: ₱${o.total_amount}</div>
+            ${ratingHtml}
+            <button class="btn w-100 status-btn ${flow.btnClass}" ${!flow.next ? 'disabled' : ''} data-next="${flow.next || ''}">${flow.label}</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.status-btn:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const card = this.closest('.order-card');
+        const orderId = card.dataset.orderId;
+        const nextStatus = this.dataset.next;
+        this.disabled = true;
+        try {
+          await fetch(`/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: nextStatus })
+          });
+          loadOrders();
+        } catch (err) {
+          alert('Could not update the status.');
+          this.disabled = false;
+        }
+      });
+    });
+
+  } catch (err) {
+    grid.innerHTML = '<div class="col-12 text-center py-5" style="color:var(--muted);">Could not load orders. Make sure the server is running.</div>';
+    console.error(err);
+  }
+}
+
+loadOrders();
+setInterval(loadOrders, 10000);
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

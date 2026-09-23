@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — order placed</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success-bg: #E7F3E9;
+  --success: #3D7A4E;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+.icon-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.check-badge { width: 64px; height: 64px; border-radius: 50%; background: var(--success-bg); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+.order-no { color: var(--mustard); font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
+.progress-track { display: flex; justify-content: space-between; position: relative; }
+.progress-track::before { content: ''; position: absolute; top: 14px; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
+.progress-track .fill { position: absolute; top: 14px; left: 0; height: 3px; background: var(--mustard); z-index: 1; }
+.p-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+.p-step .dot { width: 30px; height: 30px; border-radius: 50%; background: var(--border); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.8rem; }
+.p-step.done .dot { background: var(--mustard); color: var(--maroon-dark); }
+.p-step .label { font-size: 0.72rem; color: var(--muted); }
+.p-step.done .label { color: var(--text); font-weight: 600; }
+.btn-outline-dark-custom { border: 1px solid var(--border); color: var(--text); background: var(--card); }
+.btn-outline-dark-custom:hover { color: var(--text); background: var(--border); }
+.btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+.btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+</style>
+</head>
+<body>
+<script>
+if (sessionStorage.getItem("customer_logged_in") !== "true") {
+  window.location.href = "customer-login.html";
+}
+</script>
+
+<nav class="navbar navbar-dark-custom py-3">
+  <div class="container">
+    <span class="d-flex align-items-center gap-2 font-display fs-4 text-white">
+      <span class="icon-badge">🍴</span> Canteen Order
+    </span>
+  </div>
+</nav>
+
+<div class="container py-4 pb-5 text-center" style="max-width:520px;">
+  <div id="pageWrap"></div>
+</div>
+
+<script>
+const lastOrder = JSON.parse(sessionStorage.getItem('last_order') || 'null');
+const pageWrap = document.getElementById('pageWrap');
+
+if (!lastOrder) {
+  pageWrap.innerHTML = `
+    <div class="card-dark p-4">
+      <p style="color:var(--muted);">No recent order found.</p>
+      <a href="1-menu.html" class="btn btn-outline-dark-custom mt-2">Back to menu</a>
+    </div>
+  `;
+} else {
+  const itemsText = lastOrder.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+  const statusSteps = ['pending', 'preparing', 'ready', 'delivered'];
+
+  pageWrap.innerHTML = `
+    <div class="check-badge mx-auto mb-3">✓</div>
+    <h2 class="font-display">Order placed!</h2>
+    <div class="order-no my-2">Order #${lastOrder.order_id}</div>
+
+    <div class="card-dark p-4 text-start mt-3">
+      <div class="progress-track my-3" id="progressTrack">
+        <div class="fill" id="progressFill"></div>
+        <div class="p-step" id="step0"><div class="dot">1</div><div class="label">Placed</div></div>
+        <div class="p-step" id="step1"><div class="dot">2</div><div class="label">Preparing</div></div>
+        <div class="p-step" id="step2"><div class="dot">3</div><div class="label">On the way</div></div>
+        <div class="p-step" id="step3"><div class="dot">4</div><div class="label">Delivered</div></div>
+      </div>
+      <p id="statusNote" class="text-center small mt-2" style="color:var(--muted);"></p>
+
+      <div class="mt-4">
+        <div class="d-flex justify-content-between border-bottom py-2 small" style="border-color:var(--border) !important;"><span style="color:var(--muted);">Deliver to</span><span>${lastOrder.building} Building, ${lastOrder.room}</span></div>
+        <div class="d-flex justify-content-between border-bottom py-2 small" style="border-color:var(--border) !important;"><span style="color:var(--muted);">Payment</span><span>${lastOrder.payment}</span></div>
+        <div class="d-flex justify-content-between border-bottom py-2 small" style="border-color:var(--border) !important;"><span style="color:var(--muted);">Items</span><span>${itemsText}</span></div>
+        <div class="d-flex justify-content-between py-2 small"><span style="color:var(--muted);">Total</span><span class="fw-bold">₱${lastOrder.total}</span></div>
+      </div>
+    </div>
+
+    <a href="1-menu.html" class="btn btn-outline-dark-custom w-100 mt-4">Order something else</a>
+    <a href="my-orders.html" class="btn btn-teal w-100 mt-2">View all my orders →</a>
+  `;
+
+  async function refreshStatus() {
+    try {
+      const res = await fetch(`/api/orders/${lastOrder.order_id}/status`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const stepIndex = statusSteps.indexOf(data.status);
+      if (stepIndex < 0) return;
+
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('step' + i).classList.toggle('done', i <= stepIndex);
+      }
+      const fillPercent = (stepIndex / (statusSteps.length - 1)) * 100;
+      document.getElementById('progressFill').style.width = fillPercent + '%';
+
+      const note = document.getElementById('statusNote');
+      if (data.status === 'ready') note.textContent = '🛵 Your order is on its way!';
+      else if (data.status === 'delivered') note.textContent = '✅ Your order has been delivered.';
+      else if (data.status === 'preparing') note.textContent = '👨‍🍳 Your order is being prepared.';
+      else note.textContent = 'Waiting for the kitchen.';
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  refreshStatus();
+  setInterval(refreshStatus, 8000);
+}
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — order online</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
+  color: var(--text);
+}
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+
+.navbar-dark-custom {
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
+}
+.icon-badge {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--mustard); color: var(--maroon-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.pill-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.pill-btn:hover { color: #fff; background: rgba(255,255,255,0.2); }
+.count-badge {
+  background: var(--mustard); color: var(--maroon-dark);
+  border-radius: 50%; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+}
+
+.cat-tab {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.85rem; font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cat-tab.active { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; border-color: var(--maroon); }
+
+.card-dark {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.thumb-gradient {
+  height: 170px;
+  background: linear-gradient(135deg, var(--mustard), var(--maroon));
+  font-size: 2rem;
+  overflow: hidden;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+.price-text { color: var(--mustard); font-family: 'DM Serif Display', serif; font-weight: 700; }
+.add-btn {
+  background: var(--mustard); color: var(--maroon-dark); border: none;
+  width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.1rem;
+}
+.add-btn:hover { background: var(--mustard-dark); color: #fff; }
+</style>
+</head>
+<body>
+
+<script>
+if (sessionStorage.getItem('customer_logged_in') !== 'true') {
+  window.location.href = 'customer-login.html';
+}
+</script>
+
+<nav class="navbar navbar-dark-custom sticky-top py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="d-flex align-items-center gap-2 font-display fs-4 text-white">
+      <span class="icon-badge">🍴</span> Canteen Order
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <a href="incoming-orders.html" class="pill-btn px-3 py-2 small" id="incomingBtn">🛵 Incoming <span class="count-badge ms-1" id="incomingCount">0</span></a>
+      <a href="my-orders.html" class="text-white-50 small text-decoration-none">My orders</a>
+      <a href="cart.html" class="pill-btn px-3 py-2 small">🛒 Cart <span class="count-badge ms-1" id="cartCount">0</span></a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4 pb-5">
+
+  <div class="text-center mb-4">
+    <div class="text-uppercase small fw-bold mb-1" style="color:var(--mustard-dark); letter-spacing:0.1em;">Open now · 7:00 AM – 5:00 PM</div>
+    <h1 class="font-display">What are you craving today?</h1>
+    <p style="color:var(--muted);">Order now, pick your delivery room, and we'll bring it straight to you.</p>
+  </div>
+
+  <div class="mb-3">
+    <input type="text" id="menuSearch" class="form-control" placeholder="🔍 Search for an item..." style="max-width:340px; margin:0 auto; background:#F0F6FB; color:#16283F; border:1px solid var(--border);">
+  </div>
+
+  <div class="d-flex gap-2 mb-4 flex-nowrap overflow-auto pb-1" id="categoryTabs">
+    <div class="cat-tab active px-3 py-2" data-cat="All">All</div>
+    <div class="cat-tab px-3 py-2" data-cat="Meals">Meals</div>
+    <div class="cat-tab px-3 py-2" data-cat="Snacks">Snacks</div>
+    <div class="cat-tab px-3 py-2" data-cat="Drinks">Drinks</div>
+    <div class="cat-tab px-3 py-2" data-cat="Desserts">Desserts</div>
+  </div>
+
+  <div id="menuContainer" class="row g-3">
+    <div class="col-12 text-center py-5" style="color:var(--muted);">Loading menu...</div>
+  </div>
+
+</div>
+
+<script>
+const categoryEmoji = { Meals: '🍛', Snacks: '🍟', Drinks: '🧃', Desserts: '🍰' };
+let allMenuItems = [];
+
+function getCart() {
+  return JSON.parse(localStorage.getItem('canteen_cart') || '[]');
+}
+function saveCart(cart) {
+  localStorage.setItem('canteen_cart', JSON.stringify(cart));
+}
+function updateCartBadge() {
+  const cart = getCart();
+  const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
+  document.getElementById('cartCount').textContent = totalQty;
+}
+
+function addToCart(item) {
+  const cart = getCart();
+  const existing = cart.find(i => i.item_id === item.item_id);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ item_id: item.item_id, name: item.item_name, price: item.price, quantity: 1 });
+  }
+  saveCart(cart);
+  updateCartBadge();
+}
+
+function renderMenuItems(items) {
+  const container = document.getElementById('menuContainer');
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="col-12 text-center py-5" style="color:var(--muted);">No items in this category.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => `
+    <div class="col-6 col-md-4">
+      <div class="card-dark h-100 d-flex flex-column">
+        <div class="thumb-gradient d-flex align-items-center justify-content-center">${item.image_url ? `<img src="${item.image_url}" style="width:100%;height:100%;object-fit:cover;object-position:center;">` : (categoryEmoji[item.category] || '🍽️')}</div>
+        <div class="p-3 d-flex flex-column flex-grow-1">
+          <div class="fw-semibold">${item.item_name}</div>
+          <div class="small mb-2 flex-grow-1" style="color:var(--muted);">${item.description || item.category}</div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="price-text">₱${item.price}</span>
+            <button class="add-btn" data-id="${item.item_id}" data-name="${item.item_name}" data-price="${item.price}">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      addToCart({
+        item_id: Number(this.dataset.id),
+        item_name: this.dataset.name,
+        price: Number(this.dataset.price)
+      });
+    });
+  });
+}
+
+let activeCategory = 'All';
+let searchQuery = '';
+
+function applyFilters() {
+  let filtered = activeCategory === 'All' ? allMenuItems : allMenuItems.filter(i => i.category === activeCategory);
+  if (searchQuery.trim() !== '') {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(i => i.item_name.toLowerCase().includes(q));
+  }
+  renderMenuItems(filtered);
+}
+
+document.querySelectorAll('.cat-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    activeCategory = this.dataset.cat;
+    applyFilters();
+  });
+});
+
+document.getElementById('menuSearch').addEventListener('input', function() {
+  searchQuery = this.value;
+  applyFilters();
+});
+
+async function loadMenu() {
+  const container = document.getElementById('menuContainer');
+  try {
+    const res = await fetch('/api/menu');
+    if (!res.ok) throw new Error('Server error');
+    const items = await res.json();
+    allMenuItems = items;
+
+    if (items.length === 0) {
+      container.innerHTML = '<div class="col-12 text-center py-5" style="color:var(--muted);">No items available on the menu yet.</div>';
+      return;
+    }
+
+    renderMenuItems(items);
+
+  } catch (err) {
+    container.innerHTML = '<div class="col-12 text-center py-5" style="color:var(--muted);">Could not load the menu. Make sure the server is running (node server.js).</div>';
+    console.error(err);
+  }
+}
+
+async function updateIncomingBadge() {
+  const customerId = sessionStorage.getItem('customer_id');
+  if (!customerId) return;
+  try {
+    const res = await fetch(`/api/customer/${customerId}/orders`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const uniqueOrderIds = new Set();
+    rows.forEach(r => {
+      if (r.status !== 'delivered' && r.status !== 'cancelled') uniqueOrderIds.add(r.order_id);
+    });
+    document.getElementById('incomingCount').textContent = uniqueOrderIds.size;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+loadMenu();
+updateCartBadge();
+updateIncomingBadge();
+setInterval(updateIncomingBadge, 10000);
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — my incoming orders</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success: #3D7A4E;
+  --success-bg: #E7F3E9;
+  --pending: #B07A1F;
+  --pending-bg: #FBF0DA;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+.icon-badge { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.order-id-text { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--mustard); }
+
+.badge-pending { background: var(--pending-bg); color: var(--pending); }
+.badge-preparing { background: #E1EAF5; color: #2E5A9C; }
+.badge-ready { background: var(--success-bg); color: var(--success); }
+
+.progress-track { display: flex; justify-content: space-between; position: relative; }
+.progress-track::before { content: ''; position: absolute; top: 12px; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
+.progress-track .fill { position: absolute; top: 12px; left: 0; height: 3px; background: var(--mustard); z-index: 1; }
+.p-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+.p-step .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.72rem; }
+.p-step.done .dot { background: var(--mustard); color: var(--maroon-dark); }
+.p-step .label { font-size: 0.68rem; color: var(--muted); }
+.p-step.done .label { color: var(--text); font-weight: 600; }
+
+.btn-outline-teal-sm { border: 1px solid var(--border); color: var(--muted); background: transparent; }
+.btn-outline-danger-sm { border: 1px solid #B5433F; color: #E8847F; background: transparent; }
+</style>
+</head>
+<body>
+
+<script>
+if (sessionStorage.getItem('customer_logged_in') !== 'true') {
+  window.location.href = 'customer-login.html';
+}
+</script>
+
+<nav class="navbar navbar-dark-custom py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="d-flex align-items-center gap-2 font-display fs-4 text-white">
+      <span class="icon-badge">🛵</span> My incoming orders
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <a href="my-orders.html" class="text-white-50 small text-decoration-none">All orders</a>
+      <a href="1-menu.html" class="text-white-50 small text-decoration-none">← Back to menu</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4 pb-5" style="max-width:720px;">
+  <div id="ordersContainer">
+    <p class="text-center" style="color:var(--muted);">Loading...</p>
+  </div>
+</div>
+
+<script>
+const statusSteps = ['pending', 'preparing', 'ready', 'delivered'];
+const badgeClass = { pending: 'badge-pending', preparing: 'badge-preparing', ready: 'badge-ready' };
+const badgeText = { pending: 'Placed', preparing: 'Preparing', ready: 'On the way' };
+const statusNoteText = {
+  pending: 'Waiting for the kitchen.',
+  preparing: '👨‍🍳 Preparing your order.',
+  ready: '🛵 Your food is out for delivery!'
+};
+
+async function loadIncomingOrders() {
+  const container = document.getElementById('ordersContainer');
+  const customerId = sessionStorage.getItem('customer_id');
+
+  try {
+    const res = await fetch(`/api/customer/${customerId}/orders`);
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    const ordersMap = {};
+    rows.forEach(row => {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          building: row.building,
+          room_number: row.room_number,
+          total_amount: row.total_amount,
+          status: row.status,
+          followed_up: row.followed_up,
+          items: []
+        };
+      }
+      ordersMap[row.order_id].items.push(`${row.quantity}x ${row.item_name}`);
+    });
+
+    const incomingOrders = Object.values(ordersMap).filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+
+    if (incomingOrders.length === 0) {
+      container.innerHTML = '<div class="text-center py-5" style="color:var(--muted);">No incoming orders right now. <a href="1-menu.html" style="color:var(--mustard); font-weight:600;">Order now →</a></div>';
+      return;
+    }
+
+    container.innerHTML = incomingOrders.map(o => {
+      const stepIndex = statusSteps.indexOf(o.status);
+      const fillPercent = (stepIndex / (statusSteps.length - 1)) * 100;
+
+      const stepsHtml = ['Placed', 'Preparing', 'On the way', 'Delivered'].map((label, i) => `
+        <div class="p-step ${i <= stepIndex ? 'done' : ''}">
+          <div class="dot">${i + 1}</div>
+          <div class="label">${label}</div>
+        </div>
+      `).join('');
+
+      const followupHtml = o.followed_up
+        ? `<div class="text-center mt-3 small fw-semibold" style="color:var(--mustard);">📨 Canteen staff has been notified about this</div>`
+        : `<button class="btn btn-outline-teal-sm w-100 mt-3 followup-btn" data-id="${o.order_id}">🔔 I have a question / follow up</button>`;
+
+      const cancelHtml = o.status === 'pending'
+        ? `<button class="btn btn-outline-danger-sm w-100 mt-2 cancel-btn" data-id="${o.order_id}">✕ Cancel order</button>`
+        : '';
+
+      return `
+        <div class="card-dark p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="order-id-text">Order #A-${String(o.order_id).padStart(4, '0')}</span>
+            <span class="badge ${badgeClass[o.status]}">${badgeText[o.status]}</span>
+          </div>
+          <div class="progress-track my-3">
+            <div class="fill" style="width:${fillPercent}%"></div>
+            ${stepsHtml}
+          </div>
+          <p class="text-center small fw-semibold" style="color:var(--mustard);">${statusNoteText[o.status]}</p>
+          <div class="small" style="color:var(--muted);">Deliver to: ${o.building} Building, ${o.room_number}</div>
+          <div class="small" style="color:var(--muted);">Items: ${o.items.join(', ')}</div>
+          <div class="fw-bold mt-1">Total: ₱${o.total_amount}</div>
+          ${followupHtml}
+          ${cancelHtml}
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.followup-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = 'Sending follow up...';
+        try {
+          await fetch(`/api/orders/${this.dataset.id}/followup`, { method: 'PUT' });
+          loadIncomingOrders();
+        } catch (err) {
+          alert('Follow up could not be sent. Please try again.');
+          this.disabled = false;
+          this.textContent = '🔔 I have a question / follow up';
+        }
+      });
+    });
+
+    container.querySelectorAll('.cancel-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+        this.disabled = true;
+        this.textContent = 'Cancelling...';
+        try {
+          const res = await fetch(`/api/orders/${this.dataset.id}/cancel`, { method: 'PUT' });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            alert(data.message || 'This order could not be cancelled.');
+            this.disabled = false;
+            this.textContent = '✕ Cancel order';
+            return;
+          }
+          loadIncomingOrders();
+        } catch (err) {
+          alert('Could not cancel the order. Please try again.');
+          this.disabled = false;
+          this.textContent = '✕ Cancel order';
+        }
+      });
+    });
+
+  } catch (err) {
+    container.innerHTML = '<div class="text-center py-5" style="color:var(--muted);">Could not load orders. Make sure the server is running.</div>';
+    console.error(err);
+  }
+}
+
+loadIncomingOrders();
+setInterval(loadIncomingOrders, 8000);
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

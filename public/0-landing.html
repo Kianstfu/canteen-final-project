@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen Order System</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.icon-circle-lg {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+  color: var(--mustard);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
+}
+.choice-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  color: var(--text);
+  max-width: 220px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.choice-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,212,191,0.15); border-color: var(--maroon); color: var(--text); }
+.choice-card .icon { font-size: 2.5rem; }
+</style>
+</head>
+<body class="d-flex align-items-start justify-content-center">
+
+<div class="container text-center" style="max-width:600px; padding-top:12vh;">
+  <div class="icon-circle-lg mx-auto mb-4">🍴</div>
+  <h1 class="font-display mb-2">Canteen Order System</h1>
+  <p class="mb-5" style="color:var(--muted);">Welcome to JPC Online Canteen Order</p>
+
+  <div class="row justify-content-center g-4">
+    <div class="col-6">
+      <a href="customer-login.html" class="choice-card p-4 h-100">
+        <div class="icon mb-3">🧑‍🎓</div>
+        <div class="fw-bold mb-1">Customer</div>
+        <div class="small" style="color:var(--muted);">Browse the menu and place an order</div>
+      </a>
+    </div>
+    <div class="col-6">
+      <a href="admin-login.html" class="choice-card p-4 h-100">
+        <div class="icon mb-3">🔐</div>
+        <div class="fw-bold mb-1">Admin</div>
+        <div class="small" style="color:var(--muted);">Login for canteen staff</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

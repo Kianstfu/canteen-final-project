@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — customer login</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.card-dark {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
+}
+.icon-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(150deg, var(--mustard), var(--mustard-dark));
+  color: var(--maroon-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.form-control-dark { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+.form-control-dark:focus { background: #F0F6FB; color: #16283F; border-color: var(--mustard); box-shadow: 0 0 0 0.25rem rgba(45,212,191,0.15); }
+.form-label-dark { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
+.btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+.btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+.link-muted { color: var(--muted); text-decoration: none; }
+.link-teal { color: var(--mustard); font-weight: 600; text-decoration: none; }
+
+.btn-google {
+  background: var(--maroon);
+  border: 1px solid var(--border);
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: background .15s ease, border-color .15s ease;
+}
+.btn-google svg { flex-shrink: 0; }
+.btn-google:hover, .btn-google:focus {
+  background: var(--mustard-dark);
+  border-color: var(--mustard-dark);
+  color: #FFFFFF;
+}
+.divider-row { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider-row hr { flex: 1; border-color: var(--border); opacity: 1; }
+.divider-row span { color: var(--muted); font-size: 0.8rem; }
+</style>
+</head>
+<body class="d-flex align-items-center justify-content-center">
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-11 col-sm-8 col-md-5 col-lg-4">
+      <div class="card-dark p-4">
+        <div class="icon-circle mx-auto mb-3">🧑‍🎓</div>
+        <h2 class="font-display text-center mb-1">Customer login</h2>
+        <p class="text-center mb-4" style="color:var(--muted); font-size:0.85rem;">Log in to see your orders</p>
+
+        <div class="alert alert-danger py-2 px-3 small" id="errorMsg" style="display:none;"></div>
+
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="username" class="form-label-dark form-label">Username</label>
+            <input id="username" type="text" class="form-control form-control-dark" required autocomplete="username">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label-dark form-label">Password</label>
+            <input id="password" type="password" class="form-control form-control-dark" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-teal w-100" id="loginBtn">Log in</button>
+        </form>
+
+        <div class="divider-row">
+          <hr><span>or</span><hr>
+        </div>
+
+        <button type="button" class="btn btn-google w-100 d-flex justify-content-center align-items-center gap-2" id="googleLoginBtn">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.9-2.26 5.36-4.78 7.02l7.73 6c4.51-4.18 7.09-10.36 7.09-17.49z" />
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <a href="customer-register.html" class="link-teal d-block text-center mt-3 small">Don't have an account? Register →</a>
+        <a href="0-landing.html" class="link-muted d-block text-center mt-2 small">← Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const btn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  errorMsg.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/customer/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      errorMsg.textContent = data.message || 'Incorrect username or password.';
+      errorMsg.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+      return;
+    }
+
+    sessionStorage.setItem('customer_logged_in', 'true');
+    sessionStorage.setItem('customer_id', data.customer_id);
+    sessionStorage.setItem('customer_name', data.full_name);
+    window.location.href = '1-menu.html';
+
+  } catch (err) {
+    errorMsg.textContent = 'Connection problem. Make sure the server is running.';
+    errorMsg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+  }
+});
+</script>
+
+<!-- Firebase (Google Sign-In + Firestore role check) — CDN modules, walang kailangang npm install -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC-iT8VGsxFv36vXqcJ0H3JocRY3UtpvW4",
+    authDomain: "canteen-app-f49eb.firebaseapp.com",
+    projectId: "canteen-app-f49eb",
+    storageBucket: "canteen-app-f49eb.firebasestorage.app",
+    messagingSenderId: "617318254071",
+    appId: "1:617318254071:web:385bca0204b8fe7e3f1af2",
+    measurementId: "G-0VS5044M2J"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const googleProvider = new GoogleAuthProvider();
+  const db = getFirestore(firebaseApp);
+
+  const googleBtn = document.getElementById('googleLoginBtn');
+  const errorMsg = document.getElementById('errorMsg');
+
+  // Tinitignan sa Firestore (users/{uid}) kung ADMIN o USER ang account.
+  // Kung wala pang doc (unang beses mag-Google-login), gagawa tayo ng
+  // bago na default 'USER' — pareho ng ginawa natin sa Casa Verlin.
+  // Pagkatapos, sa Firebase console, puntahan mo yung Firestore > users
+  // collection, hanapin yung doc mo, at palitan ang role field ng 'ADMIN'.
+  async function fetchOrCreateFirestoreRole(firebaseUser) {
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      return String(data.role || 'USER').toUpperCase();
+    }
+
+    await setDoc(userRef, {
+      displayName: firebaseUser.displayName || '',
+      email: firebaseUser.email || '',
+      role: 'USER',
+      createdAt: serverTimestamp()
+    });
+    return 'USER';
+  }
+
+  googleBtn.addEventListener('click', async () => {
+    errorMsg.style.display = 'none';
+    googleBtn.disabled = true;
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const { email, displayName } = result.user;
+      const role = await fetchOrCreateFirestoreRole(result.user);
+
+      if (role === 'ADMIN') {
+        sessionStorage.setItem('admin_logged_in', 'true');
+        sessionStorage.setItem('admin_username', displayName || email);
+        window.location.href = '5-admin-orders.html';
+        return;
+      }
+
+      const res = await fetch('/api/customer/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, full_name: displayName })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        errorMsg.textContent = data.message || data.error || 'Google sign-in failed.';
+        errorMsg.style.display = 'block';
+        googleBtn.disabled = false;
+        return;
+      }
+
+      sessionStorage.setItem('customer_logged_in', 'true');
+      sessionStorage.setItem('customer_id', data.customer_id);
+      sessionStorage.setItem('customer_name', data.full_name);
+      window.location.href = '1-menu.html';
+
+    } catch (err) {
+      errorMsg.textContent = 'Google sign-in failed. Please try again.';
+      errorMsg.style.display = 'block';
+      googleBtn.disabled = false;
+    }
+  });
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

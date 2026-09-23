@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — your cart</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+.icon-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.thumb-sm { width: 46px; height: 46px; border-radius: 8px; background: linear-gradient(135deg, var(--mustard), var(--maroon)); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: 700; }
+.line-total { color: var(--mustard); font-family: 'DM Serif Display', serif; font-weight: 700; }
+.remove-link { color: var(--muted); font-size: 0.75rem; text-decoration: underline; background: none; border: none; }
+.btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+.btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+</style>
+</head>
+<body>
+<script>
+if (sessionStorage.getItem("customer_logged_in") !== "true") {
+  window.location.href = "customer-login.html";
+}
+</script>
+
+<nav class="navbar navbar-dark-custom py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="d-flex align-items-center gap-2 font-display fs-4 text-white">
+      <span class="icon-badge">🍴</span> Canteen Order
+    </span>
+    <a href="1-menu.html" class="text-white-50 small text-decoration-none">← Back to menu</a>
+  </div>
+</nav>
+
+<div class="container py-4 pb-5" style="max-width:640px;">
+  <h2 class="font-display mb-4">Your cart</h2>
+
+  <div class="card-dark p-3 mb-3" id="cartCard"></div>
+
+  <div class="card-dark p-3">
+    <div class="d-flex justify-content-between small py-1" style="color:var(--muted);"><span>Subtotal</span><span id="subtotal">₱0</span></div>
+    <div class="d-flex justify-content-between small py-1" style="color:var(--muted);"><span>Delivery to room</span><span>Free</span></div>
+    <div class="d-flex justify-content-between fw-bold border-top py-2 mt-1" style="border-color:var(--border) !important; font-size:1.1rem;"><span>Total</span><span id="total">₱0</span></div>
+  </div>
+
+  <a href="3-checkout.html" class="btn btn-teal w-100 mt-4 py-2" id="checkoutLink">Proceed to delivery details</a>
+</div>
+
+<script>
+function getCart() {
+  return JSON.parse(localStorage.getItem('canteen_cart') || '[]');
+}
+function saveCart(cart) {
+  localStorage.setItem('canteen_cart', JSON.stringify(cart));
+}
+
+function renderCart() {
+  const cart = getCart();
+  const cartCard = document.getElementById('cartCard');
+
+  if (cart.length === 0) {
+    cartCard.innerHTML = '<div class="text-center py-4" style="color:var(--muted);">You have not added anything to your cart yet. <a href="1-menu.html" style="color:var(--maroon); font-weight:600;">Back to menu →</a></div>';
+    document.getElementById('checkoutLink').style.pointerEvents = 'none';
+    document.getElementById('checkoutLink').style.opacity = '0.5';
+  } else {
+    cartCard.innerHTML = cart.map((item, index) => `
+      <div class="d-flex align-items-center gap-3 py-3 ${index < cart.length - 1 ? 'border-bottom' : ''}" style="border-color:var(--border) !important;">
+        <div class="thumb-sm">🍽️</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">${item.name}</div>
+          <div class="small" style="color:var(--muted);">₱${item.price} each <button class="remove-link" data-index="${index}">remove</button></div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="qty-btn" data-index="${index}" data-delta="-1">−</button>
+          <span class="fw-semibold">${item.quantity}</span>
+          <button class="qty-btn" data-index="${index}" data-delta="1">+</button>
+        </div>
+        <div class="line-total text-end" style="min-width:60px;">₱${item.price * item.quantity}</div>
+      </div>
+    `).join('');
+
+    cartCard.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        changeQty(Number(this.dataset.index), Number(this.dataset.delta));
+      });
+    });
+    cartCard.querySelectorAll('.remove-link').forEach(btn => {
+      btn.addEventListener('click', function() {
+        removeItem(Number(this.dataset.index));
+      });
+    });
+  }
+
+  updateTotals();
+}
+
+function changeQty(index, delta) {
+  const cart = getCart();
+  cart[index].quantity += delta;
+  if (cart[index].quantity < 1) cart[index].quantity = 1;
+  saveCart(cart);
+  renderCart();
+}
+
+function removeItem(index) {
+  const cart = getCart();
+  cart.splice(index, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function updateTotals() {
+  const cart = getCart();
+  const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+  document.getElementById('subtotal').textContent = '₱' + subtotal;
+  document.getElementById('total').textContent = '₱' + subtotal;
+}
+
+renderCart();
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

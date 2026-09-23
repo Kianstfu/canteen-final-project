@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen — my orders</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success: #3D7A4E;
+  --success-bg: #E7F3E9;
+  --pending: #B07A1F;
+  --pending-bg: #FBF0DA;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+.icon-badge { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.order-id-text { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--mustard); }
+
+.badge-pending { background: var(--pending-bg); color: var(--pending); }
+.badge-preparing { background: #E1EAF5; color: #2E5A9C; }
+.badge-ready { background: var(--success-bg); color: var(--success); }
+.badge-delivered { background: var(--border); color: var(--muted); }
+.badge-cancelled { background: #FBEAEA; color: #B5433F; }
+
+.rating-widget { display: flex; gap: 4px; margin-top: 0.75rem; }
+.rating-widget .star { font-size: 1.4rem; cursor: pointer; color: var(--border); transition: color 0.15s ease; }
+.rating-widget .star:hover, .rating-widget .star.filled { color: #F5C518; }
+.rating-widget.submitted .star { cursor: default; }
+
+.progress-track { display: flex; justify-content: space-between; position: relative; }
+.progress-track::before { content: ''; position: absolute; top: 12px; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
+.progress-track .fill { position: absolute; top: 12px; left: 0; height: 3px; background: var(--mustard); z-index: 1; }
+.p-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+.p-step .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.72rem; }
+.p-step.done .dot { background: var(--mustard); color: var(--maroon-dark); }
+.p-step .label { font-size: 0.68rem; color: var(--muted); }
+.p-step.done .label { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<script>
+if (sessionStorage.getItem('customer_logged_in') !== 'true') {
+  window.location.href = 'customer-login.html';
+}
+</script>
+
+<nav class="navbar navbar-dark-custom py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="d-flex align-items-center gap-2 font-display fs-4 text-white">
+      <span class="icon-badge">🍴</span> Canteen Order
+    </span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="customerName" class="text-white-50 small"></span>
+      <a href="1-menu.html" class="text-white-50 small text-decoration-none">← Back to menu</a>
+      <a href="#" onclick="sessionStorage.clear(); window.location.href='0-landing.html';" class="text-white-50 small text-decoration-none">Log out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4 pb-5" style="max-width:720px;">
+  <h2 class="font-display mb-4">My orders</h2>
+  <div id="ordersContainer">
+    <p class="text-center" style="color:var(--muted);">Loading...</p>
+  </div>
+</div>
+
+<script>
+document.getElementById('customerName').textContent = sessionStorage.getItem('customer_name') || '';
+
+const statusSteps = ['pending', 'preparing', 'ready', 'delivered'];
+const statusLabels = { pending: 'Placed', preparing: 'Preparing', ready: 'On the way', delivered: 'Delivered' };
+const badgeClass = { pending: 'badge-pending', preparing: 'badge-preparing', ready: 'badge-ready', delivered: 'badge-delivered', cancelled: 'badge-cancelled' };
+const badgeText = { pending: 'Placed', preparing: 'Preparing', ready: 'On the way', delivered: 'Delivered', cancelled: 'Cancelled' };
+
+async function loadMyOrders() {
+  const container = document.getElementById('ordersContainer');
+  const customerId = sessionStorage.getItem('customer_id');
+
+  try {
+    const res = await fetch(`/api/customer/${customerId}/orders`);
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    if (rows.length === 0) {
+      container.innerHTML = '<div class="text-center py-5" style="color:var(--muted);">You have no orders yet. <a href="1-menu.html" style="color:var(--mustard); font-weight:600;">Order now →</a></div>';
+      return;
+    }
+
+    const ordersMap = {};
+    rows.forEach(row => {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          building: row.building,
+          room_number: row.room_number,
+          total_amount: row.total_amount,
+          status: row.status,
+          date_placed: row.date_placed,
+          rating: row.rating,
+          items: []
+        };
+      }
+      ordersMap[row.order_id].items.push(`${row.quantity}x ${row.item_name}`);
+    });
+
+    const orders = Object.values(ordersMap);
+
+    container.innerHTML = orders.map(o => {
+      const stepIndex = statusSteps.indexOf(o.status);
+      const fillPercent = stepIndex >= 0 ? (stepIndex / (statusSteps.length - 1)) * 100 : 0;
+      const dateStr = new Date(o.date_placed).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      const progressHtml = o.status === 'cancelled'
+        ? `<p class="text-center small my-3" style="color:var(--muted);">This order was cancelled.</p>`
+        : `<div class="progress-track my-3">
+            <div class="fill" style="width:${fillPercent}%"></div>
+            ${statusSteps.map((s, i) => `
+              <div class="p-step ${i <= stepIndex ? 'done' : ''}">
+                <div class="dot">${i + 1}</div>
+                <div class="label">${statusLabels[s]}</div>
+              </div>
+            `).join('')}
+          </div>`;
+
+      let ratingHtml = '';
+      if (o.status === 'delivered') {
+        if (o.rating) {
+          ratingHtml = `
+            <div class="small mt-2" style="color:var(--muted);">Your rating:</div>
+            <div class="rating-widget submitted">
+              ${[1,2,3,4,5].map(n => `<span class="star ${n <= o.rating ? 'filled' : ''}">★</span>`).join('')}
+            </div>
+          `;
+        } else {
+          ratingHtml = `
+            <div class="small mt-2" style="color:var(--muted);">How was your order? Tap to rate:</div>
+            <div class="rating-widget" data-order-id="${o.order_id}">
+              ${[1,2,3,4,5].map(n => `<span class="star" data-value="${n}">★</span>`).join('')}
+            </div>
+          `;
+        }
+      }
+
+      const canDelete = o.status === 'delivered' || o.status === 'cancelled';
+      const deleteHtml = canDelete
+        ? `<button class="btn btn-sm btn-outline-danger mt-2 delete-order-btn" data-id="${o.order_id}">🗑 Remove from history</button>`
+        : '';
+
+      return `
+        <div class="card-dark p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="order-id-text">Order #A-${String(o.order_id).padStart(4, '0')}</span>
+            <span class="badge ${badgeClass[o.status]}">${badgeText[o.status]}</span>
+          </div>
+          <div class="small" style="color:var(--muted);">${dateStr}</div>
+          ${progressHtml}
+          <div class="small" style="color:var(--muted);">Deliver to: ${o.building} Building, ${o.room_number}</div>
+          <div class="small" style="color:var(--muted);">Items: ${o.items.join(', ')}</div>
+          <div class="fw-bold mt-1">Total: ₱${o.total_amount}</div>
+          ${ratingHtml}
+          ${deleteHtml}
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.delete-order-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        if (!confirm('Remove this order from your history? This cannot be undone.')) return;
+        this.disabled = true;
+        this.textContent = 'Removing...';
+        try {
+          const res = await fetch(`/api/orders/${this.dataset.id}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            alert(data.message || 'This order could not be removed.');
+            this.disabled = false;
+            this.textContent = '🗑 Remove from history';
+            return;
+          }
+          loadMyOrders();
+        } catch (err) {
+          alert('Could not remove the order. Please try again.');
+          this.disabled = false;
+          this.textContent = '🗑 Remove from history';
+        }
+      });
+    });
+
+    container.querySelectorAll('.rating-widget:not(.submitted)').forEach(widget => {
+      widget.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', async function() {
+          const value = Number(this.dataset.value);
+          const orderId = widget.dataset.orderId;
+
+          widget.querySelectorAll('.star').forEach((s, i) => {
+            s.classList.toggle('filled', i < value);
+          });
+
+          try {
+            await fetch(`/api/orders/${orderId}/rating`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ rating: value })
+            });
+            loadMyOrders();
+          } catch (err) {
+            alert('Rating could not be saved. Please try again.');
+          }
+        });
+      });
+    });
+
+  } catch (err) {
+    container.innerHTML = '<div class="text-center py-5" style="color:var(--muted);">Could not load orders. Make sure the server is running.</div>';
+    console.error(err);
+  }
+}
+
+loadMyOrders();
+setInterval(loadMyOrders, 10000);
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>

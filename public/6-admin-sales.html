@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canteen admin — sales report</title>
+<meta name="theme-color" content="#1E3A5F">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/images/icon-192.png">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+.icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.sidebar-dark .nav-link { color: rgba(255,255,255,0.75); }
+.sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+.sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+.card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+.metric-card.highlight { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); }
+.metric-num { font-size: 2rem; font-family: 'DM Serif Display', serif; color: var(--mustard); }
+.metric-card.highlight .metric-num { color: #fff; }
+.metric-card.highlight .metric-label { color: var(--mustard); }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 1.25rem; height: 160px; padding: 0 0.5rem; }
+.bar-chart .bar-col { flex: 1; text-align: center; }
+.bar-chart .bar { background: linear-gradient(180deg, var(--mustard), var(--maroon)); border-radius: 6px 6px 0 0; margin: 0 auto; }
+.bar-chart .bar-label { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+.bar-chart .bar-value { font-size: 0.72rem; color: var(--text); font-weight: 600; }
+
+.table-dark-custom { color: var(--text); background: transparent; }
+.table-dark-custom th { color: var(--muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-color: var(--border) !important; background: transparent; }
+.table-dark-custom td { border-color: var(--border) !important; background: transparent; }
+.table-dark-custom tr { background: transparent; }
+
+.form-control-date { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+.btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+.btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+.trend-btn { border-color: var(--border); color: var(--muted); }
+.trend-btn.active, .trend-btn:hover { background: var(--mustard); border-color: var(--mustard); color: var(--maroon-dark); }
+</style>
+</head>
+<body>
+<script>
+if (sessionStorage.getItem("admin_logged_in") !== "true") {
+  window.location.href = "admin-login.html";
+}
+</script>
+
+<div class="d-flex">
+  <div class="sidebar-dark p-3 flex-shrink-0">
+    <div class="d-flex align-items-center gap-2 font-display fs-5 text-white mb-4 px-1">
+      <span class="icon-badge">🍴</span> Canteen Admin
+    </div>
+    <nav class="nav flex-column gap-1">
+      <a href="5-admin-orders.html" class="nav-link rounded px-3 py-2">Order queue</a>
+      <a href="6-admin-sales.html" class="nav-link active rounded px-3 py-2">Sales report</a>
+      <a href="7-admin-menu.html" class="nav-link rounded px-3 py-2">Manage menu</a>
+      <a href="#" onclick="sessionStorage.clear(); window.location.href='admin-login.html';" class="nav-link rounded px-3 py-2 mt-3" style="color:rgba(255,255,255,0.5);">Log out</a>
+    </nav>
+  </div>
+
+  <div class="flex-grow-1 p-4">
+    <h2 class="font-display mb-3">Sales report</h2>
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <label class="small" style="color:var(--muted);">Showing sales for:</label>
+      <input type="date" id="salesDate" class="form-control form-control-date" style="width:auto;">
+      <button id="viewDateBtn" class="btn btn-teal">View</button>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card-dark metric-card highlight p-3">
+          <div class="small text-uppercase fw-semibold metric-label" style="color:var(--muted); letter-spacing:0.06em;">Total sales today</div>
+          <div class="metric-num" id="dailyTotal">Loading...</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-dark metric-card p-3">
+          <div class="small text-uppercase fw-semibold" style="color:var(--muted); letter-spacing:0.06em;">Orders completed</div>
+          <div class="metric-num" id="orderCount">—</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-dark metric-card p-3">
+          <div class="small text-uppercase fw-semibold" style="color:var(--muted); letter-spacing:0.06em;">Average order value</div>
+          <div class="metric-num" id="avgOrder">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-dark p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fs-6 mb-0">Sales trend</h3>
+        <div class="d-flex gap-2 align-items-center">
+          <div class="btn-group btn-group-sm" role="group">
+            <button class="btn btn-outline-secondary trend-btn active" data-days="7">Week</button>
+            <button class="btn btn-outline-secondary trend-btn" data-days="30">Month</button>
+          </div>
+          <button class="btn btn-sm btn-teal" id="exportExcelBtn">⬇ Download Excel</button>
+        </div>
+      </div>
+      <div class="bar-chart" id="trendChart" style="height:140px;">
+        <p class="small" style="color:var(--muted);">Loading...</p>
+      </div>
+      <p class="small mt-2 mb-0" style="color:var(--muted);">The Excel download covers whichever period is selected above (Week or Month), not just a single day.</p>
+    </div>
+
+    <div class="card-dark p-3 mb-3">
+      <h3 class="fs-6 mb-3">Sales by hour</h3>
+      <div class="bar-chart" id="hourlyChart">
+        <p class="small" style="color:var(--muted);">Loading...</p>
+      </div>
+      <p class="small mt-3 mb-0" style="color:var(--muted);" id="peakHourNote"></p>
+    </div>
+
+    <div class="card-dark p-3">
+      <h3 class="fs-6 mb-3">Best sellers today</h3>
+      <table class="table table-dark-custom mb-0">
+        <thead><tr><th>Item</th><th>Qty sold</th><th>Total sales</th></tr></thead>
+        <tbody id="bestSellersBody">
+          <tr><td colspan="3" class="text-center py-4" style="color:var(--muted);">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function getSelectedDate() {
+  return document.getElementById('salesDate').value;
+}
+
+async function loadSales() {
+  try {
+    const res = await fetch('/api/sales/today?date=' + getSelectedDate());
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+
+    const total = data.daily_total || 0;
+    const orders = data.total_orders || 0;
+    const avg = orders > 0 ? (total / orders).toFixed(2) : 0;
+
+    document.getElementById('dailyTotal').textContent = '₱' + total;
+    document.getElementById('orderCount').textContent = orders;
+    document.getElementById('avgOrder').textContent = '₱' + avg;
+  } catch (err) {
+    document.getElementById('dailyTotal').textContent = 'Error';
+    console.error(err);
+  }
+}
+
+function formatHour(h) {
+  const hour = Number(h);
+  const period = hour >= 12 ? 'PM' : 'AM';
+  let displayHour = hour % 12;
+  if (displayHour === 0) displayHour = 12;
+  return displayHour + ' ' + period;
+}
+
+async function loadHourlySales() {
+  const chartEl = document.getElementById('hourlyChart');
+  const noteEl = document.getElementById('peakHourNote');
+  try {
+    const res = await fetch('/api/sales/by-hour?date=' + getSelectedDate());
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    if (rows.length === 0) {
+      chartEl.innerHTML = '<p class="small" style="color:var(--muted);">No sales on this date.</p>';
+      noteEl.textContent = '';
+      return;
+    }
+
+    const maxTotal = Math.max(...rows.map(r => r.total));
+    const maxBarHeight = 150;
+
+    chartEl.innerHTML = rows.map(r => {
+      const heightPx = Math.max(20, Math.round((r.total / maxTotal) * maxBarHeight));
+      return `
+        <div class="bar-col">
+          <div class="bar-value">₱${r.total}</div>
+          <div class="bar" style="height:${heightPx}px; width:28px;"></div>
+          <div class="bar-label">${formatHour(r.hour_of_day)}</div>
+        </div>
+      `;
+    }).join('');
+
+    const peak = rows.reduce((max, r) => r.total > max.total ? r : max, rows[0]);
+    noteEl.textContent = `${formatHour(peak.hour_of_day)} was the peak hour on this date — consider extra staff or pre-prepped stock around that time.`;
+
+  } catch (err) {
+    chartEl.innerHTML = '<p class="small" style="color:var(--muted);">Could not load the chart.</p>';
+    console.error(err);
+  }
+}
+
+async function loadBestSellers() {
+  const tbody = document.getElementById('bestSellersBody');
+  try {
+    const res = await fetch('/api/sales/best-sellers?date=' + getSelectedDate());
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4" style="color:var(--muted);">No orders placed on this date.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr><td>${r.item_name}</td><td>${r.qty_sold}</td><td>₱${r.total_sales}</td></tr>
+    `).join('');
+
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4" style="color:var(--muted);">Could not load best sellers.</td></tr>';
+    console.error(err);
+  }
+}
+
+function setDefaultDate() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById('salesDate').value = `${yyyy}-${mm}-${dd}`;
+}
+
+function formatShortDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+}
+
+let currentTrendDays = 7;
+
+async function loadTrend() {
+  const chartEl = document.getElementById('trendChart');
+  try {
+    const res = await fetch('/api/sales/trend?days=' + currentTrendDays);
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    if (rows.length === 0) {
+      chartEl.innerHTML = '<p class="small" style="color:var(--muted);">No sales in this period yet.</p>';
+      return;
+    }
+
+    const maxTotal = Math.max(...rows.map(r => r.total), 1);
+    const maxBarHeight = 100;
+    const barWidth = currentTrendDays > 14 ? 10 : 24;
+
+    chartEl.innerHTML = rows.map(r => {
+      const heightPx = Math.max(6, Math.round((r.total / maxTotal) * maxBarHeight));
+      return `
+        <div class="bar-col">
+          ${barWidth >= 20 ? `<div class="bar-value">₱${r.total}</div>` : ''}
+          <div class="bar" style="height:${heightPx}px; width:${barWidth}px;"></div>
+          <div class="bar-label" style="font-size:${barWidth >= 20 ? '0.75rem' : '0.6rem'};">${formatShortDate(r.sale_date)}</div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    chartEl.innerHTML = '<p class="small" style="color:var(--muted);">Could not load the trend chart.</p>';
+    console.error(err);
+  }
+}
+
+document.querySelectorAll('.trend-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentTrendDays = Number(this.dataset.days);
+    loadTrend();
+  });
+});
+
+
+async function downloadExcel() {
+  const btn = document.getElementById('exportExcelBtn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing...';
+
+  try {
+    const res = await fetch('/api/sales/best-sellers-range?days=' + currentTrendDays);
+    if (!res.ok) throw new Error('Server error');
+    const rows = await res.json();
+
+    if (rows.length === 0) {
+      alert('No sales data for this period yet.');
+      return;
+    }
+
+    const periodLabel = currentTrendDays === 7 ? 'Weekly' : 'Monthly';
+    const grandTotal = rows.reduce((sum, r) => sum + r.total_sales, 0);
+
+    // gumawa ng HTML table na maiintindihan ni Excel bilang spreadsheet
+    let html = `
+      <table border="1">
+        <tr><th colspan="3">${periodLabel} Sales Report — last ${currentTrendDays} days</th></tr>
+        <tr><th>Item</th><th>Qty Sold</th><th>Total Sales (₱)</th></tr>
+    `;
+    rows.forEach(r => {
+      html += `<tr><td>${r.item_name}</td><td>${r.qty_sold}</td><td>${r.total_sales}</td></tr>`;
+    });
+    html += `<tr><td colspan="2"><b>Grand Total</b></td><td><b>${grandTotal}</b></td></tr></table>`;
+
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sales-report-${periodLabel.toLowerCase()}-${getSelectedDate()}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    alert('Could not prepare the Excel file. Please try again.');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬇ Download Excel';
+  }
+}
+
+document.getElementById('exportExcelBtn').addEventListener('click', downloadExcel);
+
+function loadAllSalesData() {
+  loadSales();
+  loadHourlySales();
+  loadBestSellers();
+}
+
+setDefaultDate();
+loadAllSalesData();
+loadTrend();
+
+document.getElementById('viewDateBtn').addEventListener('click', loadAllSalesData);
+
+setInterval(loadAllSalesData, 15000);
+</script>
+
+<script src="/register-sw.js" defer></script>
+</body>
+</html>
