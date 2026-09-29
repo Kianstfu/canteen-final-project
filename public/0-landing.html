@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Canteen Order System</title>
+<title>JPC Online Canteen</title>
 <meta name="theme-color" content="#1E3A5F">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/images/icon-192.png">
@@ -11,76 +11,170 @@
 <link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
-
-:root {
-  --maroon: #1E3A5F;
-  --maroon-dark: #0B1626;
-  --mustard: #2DD4BF;
-  --mustard-dark: #14B8A6;
-  --cream: #0B1626;
-  --card: #16283F;
-  --text: #E8F1F8;
-  --muted: #7C93AC;
-  --border: #24425F;
-}
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
-  color: var(--text);
-  min-height: 100vh;
-}
-.font-display { font-family: 'DM Serif Display', Georgia, serif; }
-.icon-circle-lg {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
-  color: var(--mustard);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
-  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
-}
-.choice-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-  color: var(--text);
-  max-width: 220px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.choice-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(45,212,191,0.15); border-color: var(--maroon); color: var(--text); }
-.choice-card .icon { font-size: 2.5rem; }
+:root { --maroon:#1E3A5F; --maroon-dark:#0B1626; --mustard:#2DD4BF; --mustard-dark:#14B8A6; --card:#16283F; --text:#E8F1F8; --muted:#7C93AC; --border:#24425F; }
+html { scroll-behavior: smooth; }
+body { font-family:'Inter',system-ui,sans-serif; background:linear-gradient(180deg,#0B1626 0%,#0F2038 100%); color:var(--text); }
+.font-display { font-family:'DM Serif Display',Georgia,serif; }
+.topbar { position:fixed; top:0; left:0; right:0; z-index:10; background:rgba(11,22,38,.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); }
+.topbar a.link { color:var(--text); text-decoration:none; font-size:.9rem; margin-left:1.25rem; opacity:.85; }
+.topbar a.link:hover { color:var(--mustard); opacity:1; }
+.btn-teal { background:linear-gradient(150deg,var(--mustard),var(--mustard-dark)); color:var(--maroon-dark); font-weight:700; border:none; }
+.btn-teal:hover { filter:brightness(1.1); color:var(--maroon-dark); }
+.btn-outline-light2 { border:1px solid rgba(255,255,255,.6); color:#fff; font-weight:600; }
+.btn-outline-light2:hover { background:rgba(255,255,255,.12); color:#fff; }
+.hero { min-height:100vh; display:flex; align-items:center; text-align:center; padding:110px 0 70px;
+  background:linear-gradient(180deg,rgba(11,22,38,.55) 0%,rgba(11,22,38,.75) 60%,#0B1626 100%),url('/images/campus.jpg') center/cover no-repeat; }
+.hero h1 { font-size:clamp(2.2rem,6vw,3.8rem); text-shadow:0 2px 18px rgba(0,0,0,.5); }
+.section { padding:70px 0; }
+.card-dark { background:var(--card); border:1px solid var(--border); border-radius:1rem; }
+.step-num { width:48px; height:48px; border-radius:50%; background:linear-gradient(150deg,var(--mustard),var(--mustard-dark)); color:var(--maroon-dark); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin:0 auto 1rem; }
+.feature .icon { font-size:2.2rem; }
+.dish { overflow:hidden; transition:transform .15s ease; }
+.dish:hover { transform:translateY(-4px); }
+.dish .thumb { height:150px; background:linear-gradient(150deg,var(--maroon),var(--maroon-dark)); display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
+.dish img { width:100%; height:100%; object-fit:cover; }
+.price { color:var(--mustard); font-family:'DM Serif Display',serif; font-weight:700; }
+.muted { color:var(--muted); }
+.cta { background:linear-gradient(135deg,var(--maroon),var(--maroon-dark)); border:1px solid var(--border); border-radius:1.25rem; }
+.gal { height:220px; border-radius:1rem; border:1px solid var(--border); background-image:url('/images/campus.jpg'); background-repeat:no-repeat; transition:transform .15s ease; }
+.gal:hover { transform:scale(1.02); }
+.info-row { display:flex; justify-content:space-between; padding:.55rem 0; border-bottom:1px solid var(--border); font-size:.92rem; }
+.info-row:last-child { border-bottom:none; }
+footer { border-top:1px solid var(--border); padding:28px 0; color:var(--muted); font-size:.85rem; }
 </style>
 </head>
-<body class="d-flex align-items-start justify-content-center">
+<body>
 
-<div class="container text-center" style="max-width:600px; padding-top:12vh;">
-  <div class="icon-circle-lg mx-auto mb-4">🍴</div>
-  <h1 class="font-display mb-2">Canteen Order System</h1>
-  <p class="mb-5" style="color:var(--muted);">Welcomee to JPC Online Canteen Order</p>
-
-  <div class="row justify-content-center g-4">
-    <div class="col-6">
-      <a href="customer-login.html" class="choice-card p-4 h-100">
-        <div class="icon mb-3">🧑‍🎓</div>
-        <div class="fw-bold mb-1">Customerr</div>
-        <div class="small" style="color:var(--muted);">Browse the menu and place an order</div>
-      </a>
-    </div>
-    <div class="col-6">
-      <a href="admin-login.html" class="choice-card p-4 h-100">
-        <div class="icon mb-3">🔐</div>
-        <div class="fw-bold mb-1">Adminn</div>
-        <div class="small" style="color:var(--muted);">Login for canteen staff</div>
-      </a>
+<nav class="topbar">
+  <div class="container d-flex align-items-center justify-content-between py-2">
+    <span class="fw-bold">🍴 JPC Canteen</span>
+    <div class="d-flex align-items-center">
+      <a href="#how" class="link d-none d-sm-inline">How it works</a>
+      <a href="#menu" class="link d-none d-sm-inline">Menu</a>
+      <a href="#about" class="link d-none d-sm-inline">About</a>
+      <a href="#contact" class="link d-none d-sm-inline">Contact</a>
+      <a href="customer-login.html" class="btn btn-teal btn-sm ms-3 px-3">Log in</a>
     </div>
   </div>
-</div>
+</nav>
 
+<header class="hero">
+  <div class="container">
+    <p class="text-uppercase small mb-2" style="letter-spacing:.2em; color:var(--mustard);">Welcome to JPC Online Canteen</p>
+    <h1 class="font-display mb-3">Order ahead.<br>Skip the line.</h1>
+    <p class="mb-4 mx-auto" style="max-width:560px; opacity:.9;">Browse today's menu, place your order from your phone, and have it delivered to your building and room.</p>
+    <a href="customer-login.html" class="btn btn-teal btn-lg px-4 me-2">Log in / Register</a>
+    <a href="#menu" class="btn btn-outline-light2 btn-lg px-4">See the menu</a>
+  </div>
+</header>
+
+<section class="section" id="how">
+  <div class="container text-center">
+    <h2 class="font-display mb-2">How it works</h2>
+    <p class="muted mb-5">Four easy steps from craving to counter.</p>
+    <div class="row g-4">
+      <div class="col-6 col-md-3"><div class="card-dark p-4 h-100"><div class="step-num">1</div><div class="fw-semibold mb-1">Log in</div><div class="small muted">Create an account, or continue with Google.</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-dark p-4 h-100"><div class="step-num">2</div><div class="fw-semibold mb-1">Pick your food</div><div class="small muted">Browse meals, snacks, drinks and desserts.</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-dark p-4 h-100"><div class="step-num">3</div><div class="fw-semibold mb-1">Checkout</div><div class="small muted">Enter your building and room number.</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-dark p-4 h-100"><div class="step-num">4</div><div class="fw-semibold mb-1">Enjoy</div><div class="small muted">Track your order status in My Orders.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="menu" style="background:rgba(22,40,63,.35);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="font-display mb-2">Today's menu</h2>
+      <p class="muted mb-0">A taste of what's cooking. Log in to order.</p>
+    </div>
+    <div class="row g-4" id="menuPreview">
+      <div class="col-12 text-center muted">Loading menu...</div>
+    </div>
+    <div class="text-center mt-5"><a href="customer-login.html" class="btn btn-teal px-4">Order now</a></div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-md-4 feature"><div class="icon mb-2">⚡</div><div class="fw-semibold mb-1">Fast</div><div class="small muted">Order in under a minute, no more waiting in line.</div></div>
+      <div class="col-md-4 feature"><div class="icon mb-2">📍</div><div class="fw-semibold mb-1">Delivered to you</div><div class="small muted">Tell us your building and room, we bring it over.</div></div>
+      <div class="col-md-4 feature"><div class="icon mb-2">📱</div><div class="fw-semibold mb-1">Works on your phone</div><div class="small muted">Install it as an app straight from your browser.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="gallery">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="font-display mb-2">Our campus</h2>
+      <p class="muted mb-0">Where your next meal is waiting.</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="gal" style="background-size:260%; background-position:28% 72%;" role="img" aria-label="Campus fountain"></div></div>
+      <div class="col-md-4"><div class="gal" style="background-size:200%; background-position:52% 62%;" role="img" aria-label="Campus entrance arch"></div></div>
+      <div class="col-md-4"><div class="gal" style="background-size:220%; background-position:100% 35%;" role="img" aria-label="Palm trees"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact" style="background:rgba(22,40,63,.35);">
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <div class="card-dark p-4 h-100">
+          <h4 class="font-display mb-3">🕒 Opening hours</h4>
+          <div class="info-row"><span>Monday – Friday</span><span class="muted">7:00 AM – 5:00 PM</span></div>
+          <div class="info-row"><span>Saturday</span><span class="muted">7:00 AM – 12:00 PM</span></div>
+          <div class="info-row"><span>Sunday</span><span class="muted">Closed</span></div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card-dark p-4 h-100">
+          <h4 class="font-display mb-3">📞 Contact us</h4>
+          <div class="info-row"><span>Location</span><span class="muted">JPC Canteen, Campus Grounds</span></div>
+          <div class="info-row"><span>Phone</span><span class="muted">0912 464 2279</span></div>
+          <div class="info-row"><span>Email</span><span class="muted">jpccanteen@gmail.com</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="cta text-center p-5">
+      <h2 class="font-display mb-2">Hungry?</h2>
+      <p class="muted mb-4">Create an account in seconds, or use your Google account.</p>
+      <a href="customer-login.html" class="btn btn-teal btn-lg px-5">Get started</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container text-center">© JPC Online Canteen Order System</div>
+</footer>
+
+<script>
+const emoji = { Meals:'🍛', Snacks:'🍟', Drinks:'🧃', Desserts:'🍰' };
+fetch('/api/menu').then(r => r.json()).then(items => {
+  const box = document.getElementById('menuPreview');
+  if (!Array.isArray(items) || !items.length) { box.innerHTML = '<div class="col-12 text-center muted">Menu coming soon.</div>'; return; }
+  box.innerHTML = items.slice(0, 8).map(i => `
+    <div class="col-6 col-md-3">
+      <div class="card-dark dish h-100">
+        <div class="thumb">${i.image_url ? `<img src="${i.image_url}" alt="">` : (emoji[i.category] || '🍽️')}</div>
+        <div class="p-3">
+          <div class="fw-semibold">${i.item_name}</div>
+          <div class="small muted mb-1">${i.category || ''}</div>
+          <div class="price">₱${Number(i.price).toFixed(2)}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}).catch(() => {
+  document.getElementById('menuPreview').innerHTML = '<div class="col-12 text-center muted">Menu unavailable right now.</div>';
+});
+</script>
 <script src="/register-sw.js" defer></script>
 </body>
 </html>

@@ -1,7 +1,6 @@
 const express = require('express');
 const { connectDB } = require('./db');
 
-const adminRoutes = require('./routes/admin.routes');
 const menuRoutes = require('./routes/menu.routes');
 const ordersRoutes = require('./routes/orders.routes');
 const salesRoutes = require('./routes/sales.routes');
@@ -17,7 +16,6 @@ app.get('/', (req, res) => {
   res.redirect('/0-landing.html');
 });
 
-app.use('/api/admin', adminRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/sales', salesRoutes);

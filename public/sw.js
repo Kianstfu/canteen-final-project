@@ -1,7 +1,8 @@
-const CACHE_NAME = "online-canteen-v2";
+const CACHE_NAME = "online-canteen-v3";
 
 const PRECACHE_URLS = [
   "/0-landing.html",
+  "/images/campus.jpg",
   "/1-menu.html",
   "/cart.html",
   "/3-checkout.html",

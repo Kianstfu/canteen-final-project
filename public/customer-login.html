@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Canteen — customer login</title>
+<title>Canteen — login</title>
 <meta name="theme-color" content="#1E3A5F">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/images/icon-192.png">
@@ -76,8 +76,8 @@ body {
     <div class="col-11 col-sm-8 col-md-5 col-lg-4">
       <div class="card-dark p-4">
         <div class="icon-circle mx-auto mb-3">🧑‍🎓</div>
-        <h2 class="font-display text-center mb-1">Customer login</h2>
-        <p class="text-center mb-4" style="color:var(--muted); font-size:0.85rem;">Log in to see your orders</p>
+        <h2 class="font-display text-center mb-1">Log in</h2>
+        <p class="text-center mb-4" style="color:var(--muted); font-size:0.85rem;">Welcome to JPC Online Canteen</p>
 
         <div class="alert alert-danger py-2 px-3 small" id="errorMsg" style="display:none;"></div>
 
@@ -158,11 +158,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 });
 </script>
 
-<!-- Firebase (Google Sign-In + Firestore role check) — CDN modules, walang kailangang npm install -->
+<!-- Firebase (Google Sign-In lang — walang Firestore na kailangan) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC-iT8VGsxFv36vXqcJ0H3JocRY3UtpvW4",
@@ -174,36 +173,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     measurementId: "G-0VS5044M2J"
   };
 
+  // ISANG Gmail lang ang admin. Kahit sinong ibang Google account = guest/customer.
+  const ADMIN_EMAIL = "delosreyeskenzedrick2@gmail.com";
+
   const firebaseApp = initializeApp(firebaseConfig);
   const auth = getAuth(firebaseApp);
   const googleProvider = new GoogleAuthProvider();
-  const db = getFirestore(firebaseApp);
 
   const googleBtn = document.getElementById('googleLoginBtn');
   const errorMsg = document.getElementById('errorMsg');
-
-  // Tinitignan sa Firestore (users/{uid}) kung ADMIN o USER ang account.
-  // Kung wala pang doc (unang beses mag-Google-login), gagawa tayo ng
-  // bago na default 'USER' — pareho ng ginawa natin sa Casa Verlin.
-  // Pagkatapos, sa Firebase console, puntahan mo yung Firestore > users
-  // collection, hanapin yung doc mo, at palitan ang role field ng 'ADMIN'.
-  async function fetchOrCreateFirestoreRole(firebaseUser) {
-    const userRef = doc(db, 'users', firebaseUser.uid);
-    const snap = await getDoc(userRef);
-
-    if (snap.exists()) {
-      const data = snap.data();
-      return String(data.role || 'USER').toUpperCase();
-    }
-
-    await setDoc(userRef, {
-      displayName: firebaseUser.displayName || '',
-      email: firebaseUser.email || '',
-      role: 'USER',
-      createdAt: serverTimestamp()
-    });
-    return 'USER';
-  }
 
   googleBtn.addEventListener('click', async () => {
     errorMsg.style.display = 'none';
@@ -211,16 +189,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const { email, displayName } = result.user;
-      const role = await fetchOrCreateFirestoreRole(result.user);
+      const { email, displayName, emailVerified } = result.user;
 
-      if (role === 'ADMIN') {
+      // Admin: rekta sa admin page
+      if (emailVerified && (email || '').toLowerCase() === ADMIN_EMAIL) {
         sessionStorage.setItem('admin_logged_in', 'true');
         sessionStorage.setItem('admin_username', displayName || email);
         window.location.href = '5-admin-orders.html';
         return;
       }
 
+      // Lahat ng iba: guest/customer
       const res = await fetch('/api/customer/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
