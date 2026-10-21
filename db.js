@@ -1,14 +1,16 @@
 const mysql = require('mysql2/promise');
 
-// Default na settings ng XAMPP MySQL:
-//   host: localhost, port: 3306, user: root, password: '' (walang password)
-// Palitan lang ang mga ito kung binago mo ang setup ng XAMPP mo (hal. naglagay ka ng password sa root).
+// Gumagamit ng environment variables (Render) kapag meron.
+// Kapag wala (hal. sa XAMPP mo sa laptop), babalik sa default na localhost.
 const pool = mysql.createPool({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: '',
-  database: 'canteen_db',
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'canteen_db',
+  ssl: process.env.DB_SSL === 'true'
+    ? { minVersion: 'TLSv1.2', rejectUnauthorized: true }
+    : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -17,10 +19,9 @@ const pool = mysql.createPool({
 
 async function connectDB() {
   try {
-    // ginagamit lang natin ito para i-test ang koneksyon pag-start ng server
     const conn = await pool.getConnection();
     conn.release();
-    console.log('✅ Connected to MySQL (canteen_db) via XAMPP');
+    console.log('✅ Connected to MySQL database');
   } catch (err) {
     console.error('❌ Connection failed:', err.message);
     throw err;
