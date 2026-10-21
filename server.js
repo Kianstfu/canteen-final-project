@@ -5,6 +5,7 @@ const menuRoutes = require('./routes/menu.routes');
 const ordersRoutes = require('./routes/orders.routes');
 const salesRoutes = require('./routes/sales.routes');
 const customerRoutes = require('./routes/customer.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Render ang magbibigay ng PORT
@@ -20,6 +21,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/customer', customerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Magsisimula na ang server kahit walang database (para makapag-deploy muna sa Render)
 app.listen(PORT, () => {

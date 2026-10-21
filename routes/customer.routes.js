@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { DEMO_ENABLED, DEMO_CUSTOMER } = require('./demo');
 
 const router = express.Router();
 
@@ -37,6 +38,12 @@ router.post('/register', async (req, res) => {
 // ─────────────────────────────────────────
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+
+  // Demo account (kung DEMO_MODE=true) — hindi kailangan ng database
+  if (DEMO_ENABLED && username === DEMO_CUSTOMER.username && password === DEMO_CUSTOMER.password) {
+    return res.json({ success: true, customer_id: DEMO_CUSTOMER.customer_id, full_name: DEMO_CUSTOMER.full_name, demo: true });
+  }
+
   try {
     const [rows] = await pool.execute('SELECT * FROM customers WHERE username = ?', [username]);
 
