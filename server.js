@@ -7,10 +7,10 @@ const salesRoutes = require('./routes/sales.routes');
 const customerRoutes = require('./routes/customer.routes');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Render ang magbibigay ng PORT
 
 app.use(express.json()); // para maintindihan ni Express ang JSON na ipapadala ng frontend
-app.use(express.static('public')); // ilalagay natin dito lahat ng HTML/CSS files mo mamaya
+app.use(express.static('public')); // dito nakalagay lahat ng HTML/CSS files
 
 app.get('/', (req, res) => {
   res.redirect('/0-landing.html');
@@ -21,10 +21,12 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/customer', customerRoutes);
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🍴 Canteen server running at http://localhost:${PORT}`);
-  });
-}).catch(() => {
-  console.error('Server not started dahil hindi makakonekta sa database. I-check ang XAMPP MySQL at db.js settings.');
+// Magsisimula na ang server kahit walang database (para makapag-deploy muna sa Render)
+app.listen(PORT, () => {
+  console.log(`🍴 Canteen server running on port ${PORT}`);
+});
+
+// Susubukan pa ring kumonekta sa database, pero hindi nito ihihinto ang server kapag nabigo
+connectDB().catch((err) => {
+  console.error('DB not connected (okay lang muna):', err.message);
 });
