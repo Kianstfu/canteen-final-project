@@ -1,14 +1,17 @@
 const mysql = require('mysql2/promise');
 
-// Default na settings ng XAMPP MySQL:
-//   host: localhost, port: 3306, user: root, password: '' (walang password)
-// Palitan lang ang mga ito kung binago mo ang setup ng XAMPP mo (hal. naglagay ka ng password sa root).
+// Env vars ang gamit (para sa Render + TiDB Cloud).
+// Kapag walang env vars, babalik sa default ng XAMPP para gumana pa rin locally.
+const useSSL = process.env.DB_SSL === 'true';
+
 const pool = mysql.createPool({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: '',
-  database: 'canteen_db',
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'canteen_db',
+  // Kailangan ng TLS ng TiDB Cloud Serverless
+  ssl: useSSL ? { minVersion: 'TLSv1.2', rejectUnauthorized: true } : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -17,10 +20,9 @@ const pool = mysql.createPool({
 
 async function connectDB() {
   try {
-    // ginagamit lang natin ito para i-test ang koneksyon pag-start ng server
     const conn = await pool.getConnection();
     conn.release();
-    console.log('✅ Connected to MySQL (canteen_db) via XAMPP');
+    console.log(`✅ Connected to MySQL (${process.env.DB_HOST || 'localhost'})`);
   } catch (err) {
     console.error('❌ Connection failed:', err.message);
     throw err;
