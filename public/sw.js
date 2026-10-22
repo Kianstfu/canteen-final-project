@@ -1,4 +1,5 @@
-const CACHE_NAME = "online-canteen-v3";
+// Palitan ang numero na ito kapag gusto mong i-force na mag-refresh ang lahat ng cache.
+const CACHE_NAME = "online-canteen-v4";
 
 const PRECACHE_URLS = [
   "/0-landing.html",
@@ -16,7 +17,7 @@ const PRECACHE_URLS = [
   "/bootstrap-5.3.8-dist/css/bootstrap.min.css"
 ];
 
-// Install: pre-cache the app shell
+// Install: pre-cache ang app shell
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
@@ -24,81 +25,80 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activate: clean up old caches
+// Activate: burahin ang lumang cache
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       )
     )
   );
   self.clients.claim();
 });
 
-// Fetch: network-first for API calls, cache-first for everything else
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  // Don't try to cache non-GET requests (POST/PUT/DELETE to /api/*)
+  // Huwag galawin ang POST/PUT/DELETE
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // API calls: always try network first, fall back to a JSON error if offline
+  // Huwag galawin ang galing sa ibang domain (Firebase, Google Fonts, atbp.).
+  // Ang browser na ang bahala sa mga iyon.
+  if (url.origin !== self.location.origin) return;
+
+  // API: laging network, JSON error kapag offline
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
-      fetch(request).catch(() =>
-        new Response(
-          JSON.stringify({ error: "Offline - walang internet connection" }),
-          { headers: { "Content-Type": "application/json" } }
-        )
+      fetch(request).catch(
+        () =>
+          new Response(
+            JSON.stringify({ error: "Offline - walang internet connection" }),
+            { headers: { "Content-Type": "application/json" } }
+          )
       )
     );
     return;
   }
 
-  // HTML pages: network-first, para laging bago ang lumalabas
-  // (customer-login.html kasama dito) — hindi na kailangan mag-hard-refresh.
-  // Fallback sa cache lang kung walang internet.
-  const isHTMLPage =
-    request.mode === "navigate" ||
-    request.destination === "document" ||
-    url.pathname.endsWith(".html");
+  // Mga larawan at Bootstrap: bihirang magbago, kaya cache-first
+  const isStaticAsset =
+    url.pathname.startsWith("/images/") ||
+    url.pathname.startsWith("/uploads/") ||
+    url.pathname.startsWith("/bootstrap-5.3.8-dist/");
 
-  if (isHTMLPage) {
+  if (isStaticAsset) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-          return response;
-        })
-        .catch(() =>
-          caches.match(request).then((cached) => cached || caches.match("/0-landing.html"))
-        )
+      caches.match(request).then(
+        (cached) =>
+          cached ||
+          fetch(request).then((response) => {
+            if (response.ok) {
+              const copy = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+            }
+            return response;
+          })
+      )
     );
     return;
   }
 
-  // Ibang static assets (css/js/images/fonts): cache-first pa rin,
-  // dahil bihira namang magbago ang mga ito at mas mabilis ang cache.
+  // Lahat ng iba (HTML, JS, CSS, JSON): NETWORK-FIRST.
+  // Laging bago ang lumalabas; cache lang ang gagamitin kapag offline.
   event.respondWith(
-    caches.match(request).then((cached) => {
-      return (
-        cached ||
-        fetch(request)
-          .then((response) => {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-            return response;
-          })
-          .catch(() => caches.match("/0-landing.html"))
-      );
-    })
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      })
+      .catch(() =>
+        caches.match(request).then((cached) => cached || caches.match("/0-landing.html"))
+      )
   );
 });
