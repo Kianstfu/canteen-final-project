@@ -180,38 +180,89 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   const auth = getAuth(firebaseApp);
   const googleProvider = new GoogleAuthProvider();
 
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+
   const googleBtn = document.getElementById('googleLoginBtn');
   const errorMsg = document.getElementById('errorMsg');
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    googleBtn.disabled = false;
+  }
+
+  // Ipinapakita ang TUNAY na dahilan (error code) para madaling ma-debug.
+  function friendlyAuthError(err) {
+    const code = (err && err.code) || 'unknown';
+    switch (code) {
+      case 'auth/unauthorized-domain':
+        return `This website (${location.hostname}) is not authorized for Google sign-in yet. (${code})`;
+      case 'auth/popup-blocked':
+        return `Your browser blocked the Google popup. Allow popups for this site, then try again. (${code})`;
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return 'Google sign-in was cancelled. Click the button to try again.';
+      case 'auth/operation-not-allowed':
+        return `Google sign-in is not enabled for this app yet. (${code})`;
+      case 'auth/network-request-failed':
+        return `Network problem. Check your internet connection and try again. (${code})`;
+      case 'auth/invalid-api-key':
+      case 'auth/api-key-not-valid.-please-pass-a-valid-api-key.':
+        return `Invalid Firebase API key. (${code})`;
+      default:
+        return `Google sign-in failed. Please try again. (${code})`;
+    }
+  }
 
   googleBtn.addEventListener('click', async () => {
     errorMsg.style.display = 'none';
     googleBtn.disabled = true;
 
+    // ── Hakbang 1: Google / Firebase popup ──
+    let user;
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const { email, displayName, emailVerified } = result.user;
+      user = result.user;
+    } catch (err) {
+      console.error('Firebase sign-in error:', err.code, err.message);
+      showError(friendlyAuthError(err));
+      return;
+    }
 
-      // Admin: rekta sa admin page
-      if (emailVerified && (email || '').toLowerCase() === ADMIN_EMAIL) {
-        sessionStorage.setItem('admin_logged_in', 'true');
-        sessionStorage.setItem('admin_username', displayName || email);
-        window.location.href = '5-admin-orders.html';
-        return;
-      }
+    const email = (user.email || '').toLowerCase();
+    const displayName = user.displayName || '';
 
-      // Lahat ng iba: guest/customer
+    // ── Admin: rekta sa admin page ──
+    if (user.emailVerified && email === ADMIN_EMAIL.toLowerCase()) {
+      sessionStorage.setItem('admin_logged_in', 'true');
+      sessionStorage.setItem('admin_username', displayName || email);
+      window.location.href = '5-admin-orders.html';
+      return;
+    }
+
+    // ── Hakbang 2: Lahat ng iba = guest/customer, i-save sa backend ──
+    try {
       const res = await fetch('/api/customer/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, full_name: displayName })
       });
 
-      const data = await res.json();
+      // Basahin muna bilang text — kapag HTML ang binalik (hal. Render natutulog
+      // o 502 galing Netlify proxy), hindi mag-crash ang res.json().
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch (_) { /* hindi JSON */ }
+
+      if (!data) {
+        console.error('Non-JSON response from server:', res.status, text.slice(0, 200));
+        showError(`The server is not responding properly (status ${res.status}). It may be waking up — wait about a minute and try again.`);
+        return;
+      }
 
       if (!res.ok || !data.success) {
-        errorMsg.textContent = data.message || data.error || 'Google sign-in failed.';
-        errorMsg.style.display = 'block';
-        googleBtn.disabled = false;
+        console.error('google-login API error:', res.status, data);
+        showError(data.message || data.error || `Server error (status ${res.status}).`);
         return;
       }
 
@@ -221,9 +272,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       window.location.href = '1-menu.html';
 
     } catch (err) {
-      errorMsg.textContent = 'Google sign-in failed. Please try again.';
-      errorMsg.style.display = 'block';
-      googleBtn.disabled = false;
+      console.error('google-login fetch failed:', err);
+      showError('Signed in with Google, but could not reach the server. Please try again in a moment.');
     }
   });
 </script>
