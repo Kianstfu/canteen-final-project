@@ -1,0 +1,39 @@
+/* Galing sa <style> ng 5-admin-orders.html — naka-scope sa body.pg-adminorders */
+body.pg-adminorders {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success: #3D7A4E;
+  --success-bg: #E7F3E9;
+  --pending: #B07A1F;
+  --pending-bg: #FBF0DA;
+}
+body.pg-adminorders { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+body.pg-adminorders .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-adminorders .sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+body.pg-adminorders .icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+body.pg-adminorders .sidebar-dark .nav-link { color: rgba(255,255,255,0.75); }
+body.pg-adminorders .sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+body.pg-adminorders .sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+body.pg-adminorders .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-adminorders .order-card.delivered { opacity: 0.4; }
+body.pg-adminorders .order-card.cancelled { opacity: 0.5; }
+body.pg-adminorders .order-id-text { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--mustard); }
+
+body.pg-adminorders .badge-pending { background: var(--pending-bg); color: var(--pending); }
+body.pg-adminorders .badge-preparing { background: #E1EAF5; color: #2E5A9C; }
+body.pg-adminorders .badge-ready { background: var(--success-bg); color: var(--success); }
+body.pg-adminorders .badge-delivered { background: var(--border); color: var(--muted); }
+body.pg-adminorders .badge-cancelled { background: #FBEAEA; color: #B5433F; }
+
+body.pg-adminorders .status-btn.pending { background: var(--mustard); color: var(--maroon-dark); border: none; }
+body.pg-adminorders .status-btn.preparing { background: #2E5A9C; color: #fff; border: none; }
+body.pg-adminorders .status-btn.ready { background: var(--success); color: #fff; border: none; }
+body.pg-adminorders .status-btn:disabled { background: var(--border); color: var(--muted); border: none; }

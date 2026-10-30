@@ -1,0 +1,42 @@
+/* Galing sa <style> ng 6-admin-sales.html — naka-scope sa body.pg-adminsales */
+body.pg-adminsales {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body.pg-adminsales { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+body.pg-adminsales .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-adminsales .sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+body.pg-adminsales .icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+body.pg-adminsales .sidebar-dark .nav-link { color: rgba(255,255,255,0.75); }
+body.pg-adminsales .sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+body.pg-adminsales .sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+body.pg-adminsales .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-adminsales .metric-card.highlight { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); }
+body.pg-adminsales .metric-num { font-size: 2rem; font-family: 'DM Serif Display', serif; color: var(--mustard); }
+body.pg-adminsales .metric-card.highlight .metric-num { color: #fff; }
+body.pg-adminsales .metric-card.highlight .metric-label { color: var(--mustard); }
+
+body.pg-adminsales .bar-chart { display: flex; align-items: flex-end; gap: 1.25rem; height: 160px; padding: 0 0.5rem; }
+body.pg-adminsales .bar-chart .bar-col { flex: 1; text-align: center; }
+body.pg-adminsales .bar-chart .bar { background: linear-gradient(180deg, var(--mustard), var(--maroon)); border-radius: 6px 6px 0 0; margin: 0 auto; }
+body.pg-adminsales .bar-chart .bar-label { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+body.pg-adminsales .bar-chart .bar-value { font-size: 0.72rem; color: var(--text); font-weight: 600; }
+
+body.pg-adminsales .table-dark-custom { color: var(--text); background: transparent; }
+body.pg-adminsales .table-dark-custom th { color: var(--muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-color: var(--border) !important; background: transparent; }
+body.pg-adminsales .table-dark-custom td { border-color: var(--border) !important; background: transparent; }
+body.pg-adminsales .table-dark-custom tr { background: transparent; }
+
+body.pg-adminsales .form-control-date { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+body.pg-adminsales .btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+body.pg-adminsales .btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+body.pg-adminsales .trend-btn { border-color: var(--border); color: var(--muted); }
+body.pg-adminsales .trend-btn.active, body.pg-adminsales .trend-btn:hover { background: var(--mustard); border-color: var(--mustard); color: var(--maroon-dark); }

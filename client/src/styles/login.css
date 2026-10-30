@@ -1,0 +1,56 @@
+/* Galing sa <style> ng customer-login.html — naka-scope sa body.pg-login */
+body.pg-login {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body.pg-login {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+body.pg-login .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-login .card-dark {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
+}
+body.pg-login .icon-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(150deg, var(--mustard), var(--mustard-dark));
+  color: var(--maroon-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+body.pg-login .form-control-dark { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+body.pg-login .form-control-dark:focus { background: #F0F6FB; color: #16283F; border-color: var(--mustard); box-shadow: 0 0 0 0.25rem rgba(45,212,191,0.15); }
+body.pg-login .form-label-dark { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
+body.pg-login .btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+body.pg-login .btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+body.pg-login .link-muted { color: var(--muted); text-decoration: none; }
+body.pg-login .link-teal { color: var(--mustard); font-weight: 600; text-decoration: none; }
+
+body.pg-login .btn-google {
+  background: var(--maroon);
+  border: 1px solid var(--border);
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: background .15s ease, border-color .15s ease;
+}
+body.pg-login .btn-google svg { flex-shrink: 0; }
+body.pg-login .btn-google:hover, body.pg-login .btn-google:focus {
+  background: var(--mustard-dark);
+  border-color: var(--mustard-dark);
+  color: #FFFFFF;
+}
+body.pg-login .divider-row { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+body.pg-login .divider-row hr { flex: 1; border-color: var(--border); opacity: 1; }
+body.pg-login .divider-row span { color: var(--muted); font-size: 0.8rem; }

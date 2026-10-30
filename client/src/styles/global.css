@@ -1,0 +1,13 @@
+/* Mga global na rule lang dito. Ang CSS ng bawat page ay nasa sarili nitong file
+   at naka-scope sa body.pg-xxx para hindi magbanggaan. */
+
+/* Ang orihinal na landing page ay may "html { scroll-behavior: smooth; }" */
+html:has(body.pg-landing) { scroll-behavior: smooth; }
+
+/* Ang <div id="root"> ay hindi gumagawa ng sariling box, kaya ang layout ay
+   pareho pa rin sa orihinal (hal. ang login pages na naka-d-flex ang <body>). */
+#root { display: contents; }
+
+/* Ang orihinal ay may inline style="border-color:var(--border) !important".
+   Hindi puwede ang !important sa inline style ng React, kaya class ito. */
+body[class*="pg-"] .bc-border { border-color: var(--border) !important; }

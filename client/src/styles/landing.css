@@ -1,0 +1,30 @@
+/* Galing sa <style> ng 0-landing.html — naka-scope sa body.pg-landing */
+body.pg-landing { --maroon:#1E3A5F; --maroon-dark:#0B1626; --mustard:#2DD4BF; --mustard-dark:#14B8A6; --card:#16283F; --text:#E8F1F8; --muted:#7C93AC; --border:#24425F; }
+body.pg-landing { font-family:'Inter',system-ui,sans-serif; background:linear-gradient(180deg,#0B1626 0%,#0F2038 100%); color:var(--text); }
+body.pg-landing .font-display { font-family:'DM Serif Display',Georgia,serif; }
+body.pg-landing .topbar { position:fixed; top:0; left:0; right:0; z-index:10; background:rgba(11,22,38,.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); }
+body.pg-landing .topbar a.link { color:var(--text); text-decoration:none; font-size:.9rem; margin-left:1.25rem; opacity:.85; }
+body.pg-landing .topbar a.link:hover { color:var(--mustard); opacity:1; }
+body.pg-landing .btn-teal { background:linear-gradient(150deg,var(--mustard),var(--mustard-dark)); color:var(--maroon-dark); font-weight:700; border:none; }
+body.pg-landing .btn-teal:hover { filter:brightness(1.1); color:var(--maroon-dark); }
+body.pg-landing .btn-outline-light2 { border:1px solid rgba(255,255,255,.6); color:#fff; font-weight:600; }
+body.pg-landing .btn-outline-light2:hover { background:rgba(255,255,255,.12); color:#fff; }
+body.pg-landing .hero { min-height:100vh; display:flex; align-items:center; text-align:center; padding:110px 0 70px;
+  background:linear-gradient(180deg,rgba(11,22,38,.55) 0%,rgba(11,22,38,.75) 60%,#0B1626 100%),url('/images/campus.jpg') center/cover no-repeat; }
+body.pg-landing .hero h1 { font-size:clamp(2.2rem,6vw,3.8rem); text-shadow:0 2px 18px rgba(0,0,0,.5); }
+body.pg-landing .section { padding:70px 0; }
+body.pg-landing .card-dark { background:var(--card); border:1px solid var(--border); border-radius:1rem; }
+body.pg-landing .step-num { width:48px; height:48px; border-radius:50%; background:linear-gradient(150deg,var(--mustard),var(--mustard-dark)); color:var(--maroon-dark); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin:0 auto 1rem; }
+body.pg-landing .feature .icon { font-size:2.2rem; }
+body.pg-landing .dish { overflow:hidden; transition:transform .15s ease; }
+body.pg-landing .dish:hover { transform:translateY(-4px); }
+body.pg-landing .dish .thumb { height:150px; background:linear-gradient(150deg,var(--maroon),var(--maroon-dark)); display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
+body.pg-landing .dish img { width:100%; height:100%; object-fit:cover; }
+body.pg-landing .price { color:var(--mustard); font-family:'DM Serif Display',serif; font-weight:700; }
+body.pg-landing .muted { color:var(--muted); }
+body.pg-landing .cta { background:linear-gradient(135deg,var(--maroon),var(--maroon-dark)); border:1px solid var(--border); border-radius:1.25rem; }
+body.pg-landing .gal { height:220px; border-radius:1rem; border:1px solid var(--border); background-image:url('/images/campus.jpg'); background-repeat:no-repeat; transition:transform .15s ease; }
+body.pg-landing .gal:hover { transform:scale(1.02); }
+body.pg-landing .info-row { display:flex; justify-content:space-between; padding:.55rem 0; border-bottom:1px solid var(--border); font-size:.92rem; }
+body.pg-landing .info-row:last-child { border-bottom:none; }
+body.pg-landing footer { border-top:1px solid var(--border); padding:28px 0; color:var(--muted); font-size:.85rem; }

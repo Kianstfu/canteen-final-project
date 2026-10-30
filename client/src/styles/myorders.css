@@ -1,0 +1,43 @@
+/* Galing sa <style> ng my-orders.html — naka-scope sa body.pg-myorders */
+body.pg-myorders {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success: #3D7A4E;
+  --success-bg: #E7F3E9;
+  --pending: #B07A1F;
+  --pending-bg: #FBF0DA;
+}
+body.pg-myorders { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+body.pg-myorders .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-myorders .navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+body.pg-myorders .icon-badge { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+body.pg-myorders .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-myorders .order-id-text { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--mustard); }
+
+body.pg-myorders .badge-pending { background: var(--pending-bg); color: var(--pending); }
+body.pg-myorders .badge-preparing { background: #E1EAF5; color: #2E5A9C; }
+body.pg-myorders .badge-ready { background: var(--success-bg); color: var(--success); }
+body.pg-myorders .badge-delivered { background: var(--border); color: var(--muted); }
+body.pg-myorders .badge-cancelled { background: #FBEAEA; color: #B5433F; }
+
+body.pg-myorders .rating-widget { display: flex; gap: 4px; margin-top: 0.75rem; }
+body.pg-myorders .rating-widget .star { font-size: 1.4rem; cursor: pointer; color: var(--border); transition: color 0.15s ease; }
+body.pg-myorders .rating-widget .star:hover, body.pg-myorders .rating-widget .star.filled { color: #F5C518; }
+body.pg-myorders .rating-widget.submitted .star { cursor: default; }
+
+body.pg-myorders .progress-track { display: flex; justify-content: space-between; position: relative; }
+body.pg-myorders .progress-track::before { content: ''; position: absolute; top: 12px; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
+body.pg-myorders .progress-track .fill { position: absolute; top: 12px; left: 0; height: 3px; background: var(--mustard); z-index: 1; }
+body.pg-myorders .p-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+body.pg-myorders .p-step .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--border); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.72rem; }
+body.pg-myorders .p-step.done .dot { background: var(--mustard); color: var(--maroon-dark); }
+body.pg-myorders .p-step .label { font-size: 0.68rem; color: var(--muted); }
+body.pg-myorders .p-step.done .label { color: var(--text); font-weight: 600; }

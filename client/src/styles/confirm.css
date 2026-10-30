@@ -1,0 +1,33 @@
+/* Galing sa <style> ng 4-order-confirmation.html — naka-scope sa body.pg-confirm */
+body.pg-confirm {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+  --success-bg: #E7F3E9;
+  --success: #3D7A4E;
+}
+body.pg-confirm { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+body.pg-confirm .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-confirm .navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+body.pg-confirm .icon-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+body.pg-confirm .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-confirm .check-badge { width: 64px; height: 64px; border-radius: 50%; background: var(--success-bg); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+body.pg-confirm .order-no { color: var(--mustard); font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
+body.pg-confirm .progress-track { display: flex; justify-content: space-between; position: relative; }
+body.pg-confirm .progress-track::before { content: ''; position: absolute; top: 14px; left: 0; right: 0; height: 3px; background: var(--border); z-index: 0; }
+body.pg-confirm .progress-track .fill { position: absolute; top: 14px; left: 0; height: 3px; background: var(--mustard); z-index: 1; }
+body.pg-confirm .p-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+body.pg-confirm .p-step .dot { width: 30px; height: 30px; border-radius: 50%; background: var(--border); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.8rem; }
+body.pg-confirm .p-step.done .dot { background: var(--mustard); color: var(--maroon-dark); }
+body.pg-confirm .p-step .label { font-size: 0.72rem; color: var(--muted); }
+body.pg-confirm .p-step.done .label { color: var(--text); font-weight: 600; }
+body.pg-confirm .btn-outline-dark-custom { border: 1px solid var(--border); color: var(--text); background: var(--card); }
+body.pg-confirm .btn-outline-dark-custom:hover { color: var(--text); background: var(--border); }
+body.pg-confirm .btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+body.pg-confirm .btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }

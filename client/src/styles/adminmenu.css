@@ -1,0 +1,40 @@
+/* Galing sa <style> ng 7-admin-menu.html — naka-scope sa body.pg-adminmenu */
+body.pg-adminmenu {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #FFFFFF;
+  --muted: #C7D6E5;
+  --border: #24425F;
+  --danger: #B5433F;
+}
+body.pg-adminmenu { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); min-height: 100vh; }
+body.pg-adminmenu .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-adminmenu .sidebar-dark { width: 220px; background: linear-gradient(180deg, var(--maroon) 0%, var(--maroon-dark) 100%); min-height: 100vh; }
+body.pg-adminmenu .icon-badge { width: 30px; height: 30px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+body.pg-adminmenu .sidebar-dark .nav-link { color: rgba(255,255,255,0.9); }
+body.pg-adminmenu .sidebar-dark .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+body.pg-adminmenu .sidebar-dark .nav-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+body.pg-adminmenu .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-adminmenu .table-dark-custom { color: var(--text); background: transparent; }
+body.pg-adminmenu .table-dark-custom th { color: #FFFFFF; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-color: var(--border) !important; background: transparent; }
+body.pg-adminmenu .table-dark-custom td { color: #FFFFFF; border-color: var(--border) !important; vertical-align: middle; background: transparent; }
+body.pg-adminmenu .table-dark-custom tr { background: transparent; }
+
+body.pg-adminmenu .item-thumb { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--mustard), var(--maroon)); display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+body.pg-adminmenu .cat-pill { font-size: 0.75rem; background: var(--card); color: #FFFFFF; }
+
+body.pg-adminmenu .form-check-input:checked { background-color: #3D7A4E; border-color: #3D7A4E; }
+
+body.pg-adminmenu .btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+body.pg-adminmenu .btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+body.pg-adminmenu .btn-outline-teal { border: 1px solid var(--danger); color: var(--danger); background: transparent; }
+body.pg-adminmenu .btn-outline-teal:hover { background: var(--danger); color: #fff; }
+
+body.pg-adminmenu .modal-content-dark { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+body.pg-adminmenu .form-control-dark, body.pg-adminmenu .form-select-dark { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+body.pg-adminmenu .form-label-dark { color: #FFFFFF; font-size: 0.82rem; font-weight: 600; }

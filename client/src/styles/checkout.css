@@ -1,0 +1,28 @@
+/* Galing sa <style> ng 3-checkout.html — naka-scope sa body.pg-checkout */
+body.pg-checkout {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body.pg-checkout { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%); color: var(--text); }
+body.pg-checkout .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+body.pg-checkout .navbar-dark-custom { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35); }
+body.pg-checkout .icon-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--mustard); color: var(--maroon-dark); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+body.pg-checkout .card-dark { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; }
+body.pg-checkout .form-control-dark, body.pg-checkout .form-select-dark { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
+body.pg-checkout .form-control-dark:focus, body.pg-checkout .form-select-dark:focus { background: #F0F6FB; color: #16283F; border-color: var(--mustard); box-shadow: 0 0 0 0.25rem rgba(45,212,191,0.15); }
+body.pg-checkout .form-label-dark { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
+
+body.pg-checkout .option-btn { border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #fff; color: #16283F; }
+body.pg-checkout .option-btn.selected-building { border-color: var(--mustard); background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; }
+body.pg-checkout .option-btn.selected-pay { border-color: var(--mustard-dark); background: #FBF1DD; color: #16283F; }
+
+body.pg-checkout .btn-teal { background: linear-gradient(150deg, var(--mustard), var(--mustard-dark)); color: var(--maroon-dark); font-weight: 700; border: none; }
+body.pg-checkout .btn-teal:hover { filter: brightness(1.1); color: var(--maroon-dark); }
+body.pg-checkout .btn-teal:disabled { opacity: 0.6; }

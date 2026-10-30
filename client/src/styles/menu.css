@@ -1,0 +1,74 @@
+/* Galing sa <style> ng 1-menu.html — naka-scope sa body.pg-menu */
+body.pg-menu {
+  --maroon: #1E3A5F;
+  --maroon-dark: #0B1626;
+  --mustard: #2DD4BF;
+  --mustard-dark: #14B8A6;
+  --cream: #0B1626;
+  --card: #16283F;
+  --text: #E8F1F8;
+  --muted: #7C93AC;
+  --border: #24425F;
+}
+body.pg-menu {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--cream) 0%, #0F2038 100%);
+  color: var(--text);
+}
+body.pg-menu .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+
+body.pg-menu .navbar-dark-custom {
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+  box-shadow: 0 8px 28px rgba(45,212,191,0.15), 0 4px 14px rgba(0,0,0,0.35);
+}
+body.pg-menu .icon-badge {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--mustard); color: var(--maroon-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+body.pg-menu .pill-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+}
+body.pg-menu .pill-btn:hover { color: #fff; background: rgba(255,255,255,0.2); }
+body.pg-menu .count-badge {
+  background: var(--mustard); color: var(--maroon-dark);
+  border-radius: 50%; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+}
+
+body.pg-menu .cat-tab {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.85rem; font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+body.pg-menu .cat-tab.active { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; border-color: var(--maroon); }
+
+body.pg-menu .card-dark {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+body.pg-menu .thumb-gradient {
+  height: 170px;
+  background: linear-gradient(135deg, var(--mustard), var(--maroon));
+  font-size: 2rem;
+  overflow: hidden;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+body.pg-menu .price-text { color: var(--mustard); font-family: 'DM Serif Display', serif; font-weight: 700; }
+body.pg-menu .add-btn {
+  background: var(--mustard); color: var(--maroon-dark); border: none;
+  width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.1rem;
+}
+body.pg-menu .add-btn:hover { background: var(--mustard-dark); color: #fff; }
