@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import usePage from '../hooks/usePage';
 import { setAdminSession, setCustomerSession } from '../lib/session';
-import { ADMIN_EMAIL, auth, googleProvider, signInWithPopup } from '../lib/firebase';
+import { auth, googleProvider, signInWithPopup, getOrCreateUserRole } from '../lib/firebase';
 import '../styles/login.css';
 
 // Ipinapakita ang TUNAY na dahilan (error code) para madaling ma-debug.
@@ -87,8 +87,19 @@ export default function Login() {
     const email = (user.email || '').toLowerCase();
     const displayName = user.displayName || '';
 
+    // Hakbang 1.5: Basahin ang role sa Firestore (users collection)
+    let role = 'user';
+    try {
+      role = await getOrCreateUserRole(user);
+    } catch (err) {
+      console.error('Firestore role lookup failed:', err.code, err.message);
+      setError(`Could not check your account role. (${err.code || 'firestore-error'})`);
+      setGoogleLoading(false);
+      return;
+    }
+
     // Admin: rekta sa admin page
-    if (user.emailVerified && email === ADMIN_EMAIL.toLowerCase()) {
+    if (role === 'admin') {
       setAdminSession(displayName || email);
       navigate('/admin/orders');
       return;
