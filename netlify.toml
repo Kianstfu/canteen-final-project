@@ -1,0 +1,27 @@
+# netlify.toml
+# Ilagay sa ROOT ng repo (kasama ng server.js at ng client/ folder).
+
+[build]
+  # Walang "base" para malinaw ang path: lahat ay relative sa root ng repo.
+  command = "cd client && npm install && npm run build"
+  publish = "client/dist"
+
+# Ipasa ang API calls sa Render backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://canteen-final-project.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# Ipasa ang mga larawan ng menu sa Render backend
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://canteen-final-project.onrender.com/uploads/:splat"
+  status = 200
+  force = true
+
+# Para gumana ang direktang pagbukas ng React routes (/menu, /admin/orders, atbp.)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
