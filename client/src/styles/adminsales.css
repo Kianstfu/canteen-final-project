@@ -32,7 +32,7 @@ body.pg-adminsales .bar-chart .bar-value { font-size: 0.72rem; color: var(--text
 
 body.pg-adminsales .table-dark-custom { color: var(--text); background: transparent; }
 body.pg-adminsales .table-dark-custom th { color: var(--muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-color: var(--border) !important; background: transparent; }
-body.pg-adminsales .table-dark-custom td { border-color: var(--border) !important; background: transparent; }
+body.pg-adminsales .table-dark-custom td { color: #FFFFFF; border-color: var(--border) !important; background: transparent; }
 body.pg-adminsales .table-dark-custom tr { background: transparent; }
 
 body.pg-adminsales .form-control-date { background: #F0F6FB; color: #16283F; border: 1px solid var(--border); }
