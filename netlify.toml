@@ -2,9 +2,11 @@
 # Ilagay sa ROOT ng repo (kasama ng server.js at ng client/ folder).
 
 [build]
-  # Walang "base" para malinaw ang path: lahat ay relative sa root ng repo.
-  command = "cd client && npm install && npm run build"
-  publish = "client/dist"
+  # Naka-set na sa "client" ang base kaya nasa loob na ng client/ folder ang build.
+  # Kaya walang "cd client" sa command, at "dist" lang ang publish.
+  base = "client"
+  command = "npm install && npm run build"
+  publish = "dist"
 
 # Ipasa ang API calls sa Render backend
 [[redirects]]
