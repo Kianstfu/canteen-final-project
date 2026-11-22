@@ -18,6 +18,14 @@ const pool = mysql.createPool({
   dateStrings: true // para consistent ang format ng petsa pag binalik sa frontend
 });
 
+// Ang TiDB Cloud ay naka-UTC by default, kaya ang CURRENT_TIMESTAMP / CURDATE() ay 8 oras
+// na nauuna sa oras sa Pilipinas. Dahil dito, ang order na nilagay mo ng umaga ay napupunta
+// sa "kahapon" sa sales report. Itinatakda natin ang bawat connection sa Philippine time
+// (+08:00, walang DST sa PH) para pareho na ang oras ng DB at ng canteen.
+pool.on('connection', (conn) => {
+  conn.query("SET time_zone = '+08:00'");
+});
+
 async function connectDB() {
   try {
     const conn = await pool.getConnection();

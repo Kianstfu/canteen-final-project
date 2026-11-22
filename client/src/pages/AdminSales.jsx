@@ -120,7 +120,7 @@ export default function AdminSales() {
       }
 
       const periodLabel = trendDays === 7 ? 'Weekly' : 'Monthly';
-      const grandTotal = rows.reduce((sum, r) => sum + r.total_sales, 0);
+      const grandTotal = rows.reduce((sum, r) => sum + Number(r.total_sales), 0);
 
       // gumawa ng HTML table na maiintindihan ni Excel bilang spreadsheet
       let html = `

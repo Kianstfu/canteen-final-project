@@ -3,12 +3,18 @@ const { pool } = require('../db');
 
 const router = express.Router();
 
+// Today's date (YYYY-MM-DD) in Philippine time. Dati toISOString() ang gamit, na UTC,
+// kaya mali ang "today" tuwing 12:00 AM – 8:00 AM sa Pilipinas.
+function todayInManila() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+}
+
 // ─────────────────────────────────────────
 // GET total sales for today (for 6-admin-sales.html)
 // ─────────────────────────────────────────
 router.get('/today', async (req, res) => {
   try {
-    const targetDate = req.query.date || new Date().toISOString().slice(0, 10); // e.g. '2026-08-01', defaults to today's date if not provided
+    const targetDate = req.query.date || todayInManila(); // e.g. '2026-08-01'; defaults to today (Philippine time)
     const [rows] = await pool.execute(
       `SELECT SUM(total_amount) AS daily_total, COUNT(*) AS total_orders
        FROM orders
@@ -26,7 +32,7 @@ router.get('/today', async (req, res) => {
 // ─────────────────────────────────────────
 router.get('/by-hour', async (req, res) => {
   try {
-    const targetDate = req.query.date || new Date().toISOString().slice(0, 10);
+    const targetDate = req.query.date || todayInManila();
     const [rows] = await pool.execute(
       `SELECT HOUR(date_placed) AS hour_of_day, SUM(total_amount) AS total
        FROM orders
@@ -46,7 +52,7 @@ router.get('/by-hour', async (req, res) => {
 // ─────────────────────────────────────────
 router.get('/best-sellers', async (req, res) => {
   try {
-    const targetDate = req.query.date || new Date().toISOString().slice(0, 10);
+    const targetDate = req.query.date || todayInManila();
     const [rows] = await pool.execute(
       `SELECT m.item_name, SUM(oi.quantity) AS qty_sold, SUM(oi.quantity * oi.price_at_order) AS total_sales
        FROM order_items oi
